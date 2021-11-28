@@ -1,26 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #define TAM_MAX 128
-#define TAM_TABELA 25
+#define TAM_TABELA 64
 
 /* Categorias: 
-    Variável Simples: {nível léxico, deslocamento, tipo} -> var
-    Procedimento: {}
-    Função: {}
-    Parâmetro Formal: {}
-    Rótulo: {}
- */
+    0: Variável Simples: {nível léxico, deslocamento, tipo} -> var
+    1: Procedimento: {}
+    2: Função: {}
+    3: Parâmetro Formal: {}
+    4: Rótulo: {}
+*/
+
+
+typedef struct {
+    char categoria[TAM_MAX];
+    int tipo;
+    int nivelLexico;
+    int deslocamento;
+} Atributos;
 
 typedef struct {
 	char ident[TAM_MAX];
-    int categoria;
-    int nivelLexico;
-    int tipo;
-    int deslocamento;
+    Atributos *atributos;
 } Simbolo;
 
 typedef struct {
-    Simbolo *simbolos;
+    Simbolo *simbolos; // simbolos[0..topo]
     int topo;
     int tamanho;
 } TabelaSimbolos;
@@ -33,7 +38,7 @@ typedef struct {
 # Imprime(TS) -> imprime tabela de símbolos.
 */
 
-TabelaSimbolos* init() {
+TabelaSimbolos* initTabela() {
     TabelaSimbolos *tabelaSimbolos = (TabelaSimbolos *) malloc(sizeof(TabelaSimbolos));
 
     tabelaSimbolos->topo = -1;
@@ -44,26 +49,48 @@ TabelaSimbolos* init() {
     return tabelaSimbolos;
 }
 
-Simbolo buscaSimbolo(char ident) {
 
+Simbolo buscaSimbolo(TabelaSimbolos *tabelaSimbolos, char ident[]) {
+    
+    for (int i = tabelaSimbolos->topo; i >= 0; i--) {
+        if (strcmp(tabelaSimbolos->simbolos[i].ident, ident) == 0) {
+            return tabelaSimbolos->simbolos[i];
+        } 
+    }
+    
+    exit(-1);
 }
 
-void insereSimbolo(char ident, int nivelLexico, int tipo, int deslocamento, int categoria) {
-
+void insereSimbolo(TabelaSimbolos *tabelaSimbolos, char ident[], Atributos *atributos) {
+    printf("ident: %s\n", ident);
+    tabelaSimbolos->tamanho++;
+    tabelaSimbolos->topo++;
+    tabelaSimbolos->simbolos[tabelaSimbolos->topo].atributos = atributos;
+    strncpy(tabelaSimbolos->simbolos[tabelaSimbolos->topo].ident, ident, TAM_MAX);
 }
 
-void retiraSimbolos(int n) {
-
-}
-
-void imprimeTabela(TabelaSimbolos ts) {
-
+void retiraSimbolos(TabelaSimbolos *tabelaSimbolos, int n) {
+    tabelaSimbolos->topo -= n;
 }
 
 void imprimeSimbolo(Simbolo simbolo) {
-
+    printf("simboloIdent: %s\n", simbolo.ident);
+    Atributos *atributos = simbolo.atributos;
+    printf("categoria: %s; tipo: %d; nivel léxico: %d; deslocamento: %d;\n", atributos->categoria, atributos->tipo, atributos->nivelLexico, atributos->deslocamento);
 }
 
-void atualizaTipo() {
-    
+void imprimeTabela(TabelaSimbolos *tabelaSimbolos) {
+    printf("topo: %d;\ntamanho: %d;\n", tabelaSimbolos->topo, tabelaSimbolos->tamanho);
+    for (int i = tabelaSimbolos->topo; i >= 0; i--) {
+        imprimeSimbolo(tabelaSimbolos->simbolos[i]);
+    }
+}
+
+void atualizaTipo(TabelaSimbolos *tabelaSimbolos, int tipo, int num_simbolos) {
+    int topo = tabelaSimbolos->topo;
+    for (int i = 0; i < num_simbolos; i++) {
+        if(tabelaSimbolos->simbolos[topo - i].atributos->tipo == -1) {
+            tabelaSimbolos->simbolos[topo - i].atributos->tipo = tipo;
+        }
+    }
 }
