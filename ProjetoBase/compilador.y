@@ -126,11 +126,11 @@ lista_idents: lista_idents VIRGULA IDENT
 ;
 
 
-comando_composto: T_BEGIN comandos T_END
+comando_composto: T_BEGIN comandos PONTO_E_VIRGULA T_END
 
 comandos: comandos PONTO_E_VIRGULA comando
-    | comando
-    |
+    | comando 
+    
 ;
 
 comando: variavel_atribuicao 
@@ -138,6 +138,7 @@ comando: variavel_atribuicao
         
     }
     atribuicao
+    | PONTO_E_VIRGULA
 ; 
 
 variavel_atribuicao: 
@@ -149,11 +150,10 @@ variavel_atribuicao:
 ;
 
 atribuicao:
-    ATRIBUICAO expressao
+    ATRIBUICAO lista_expressoes
     {
 
     }
-    PONTO_E_VIRGULA
 ;
 
 lista_expressoes:
@@ -161,49 +161,50 @@ lista_expressoes:
     | expressao
 ;
 
-expressao: expressao_simples relacao expressao_simples
+expressao: expressao_simples relacao expressao_simples { }
     | expressao_simples
 ;
 
 relacao:
-    expressao MENOR_IGUAL expressao_simples
-    { compara_tipo(pvt_expressao, pvt_expressao, 1, inteiro, booleano); geraCodigo (NULL, "CMEG"); }
-    | expressao MAIOR_IGUAL expressao_simples
-    { compara_tipo(pvt_expressao, pvt_expressao, 1, inteiro, booleano); geraCodigo (NULL, "CMAG"); }
-    | expressao MENOR expressao_simples
-    { compara_tipo(pvt_expressao, pvt_expressao, 1, inteiro, booleano); geraCodigo (NULL, "CMME"); }
-    | expressao MAIOR expressao_simples
-    { compara_tipo(pvt_expressao, pvt_expressao, 1, inteiro, booleano); geraCodigo (NULL, "CMMA"); }
-    | expressao IGUAL expressao_simples
-    { compara_tipo(pvt_expressao, pvt_expressao, 0, inteiro, booleano); geraCodigo (NULL, "CMIG"); }
-    | expressao DIFERENTE expressao_simples
-    { compara_tipo(pvt_expressao, pvt_expressao, 0, inteiro, booleano); geraCodigo (NULL, "CMDG"); }
-    | expressao_simples
+    MENOR_IGUAL
+    { geraCodigo (NULL, "CMEG"); }
+    | MAIOR_IGUAL 
+    { geraCodigo (NULL, "CMAG"); }
+    | MENOR 
+    { geraCodigo (NULL, "CMME"); }
+    | MAIOR 
+    { geraCodigo (NULL, "CMMA"); }
+    | IGUAL 
+    { geraCodigo (NULL, "CMIG"); }
+    | DIFERENTE 
+    { geraCodigo (NULL, "CMDG"); }
 ;
 
 expressao_simples:
-    MAIS { empilha(); } termo { compara_tipo(); }
-    | MENOS { empilha(); } termo { compara_tipo(); geraCodigo (NULL, "INVR");  }
-    | termo { empilha(); }
-    | expressao_simples MAIS termo { compara_tipo(); geraCodigo (NULL, "SOMA"); }
-    | expressao_simples MENOS termo { compara_tipo(); geraCodigo (NULL, "SUBT"); }
-    | expressao_simples OR termo { compara_tipo(); geraCodigo (NULL, "DISJ"); } 
+    expressao_simples MAIS termo { geraCodigo (NULL, "SOMA"); }
+    | expressao_simples MENOS termo { geraCodigo (NULL, "SUBT"); }
+    | expressao_simples OR termo { geraCodigo (NULL, "DISJ"); } 
+    | MAIS { } termo { }
+    | MENOS { } termo { geraCodigo (NULL, "INVR");  }
+    | termo { }
 ;
 
 termo:
-    fator { empilha(); }
-    | termo MULTI fator { compara_tipo(); geraCodigo (NULL, "MULT"); }
-    | termo DIV fator { compara_tipo(); geraCodigo (NULL, "DIVI"); }
-    | termo AND fator { compara_tipo(); geraCodigo (NULL, "CONJ"); }
+    termo MULTI fator { geraCodigo (NULL, "MULT"); }
+    | termo DIV fator { geraCodigo (NULL, "DIVI"); }
+    | termo AND fator { geraCodigo (NULL, "CONJ"); }
+    | fator { }
+    
    
 ;
 
 fator: 
-    variavel
+    NOT fator
+    | variavel
     | numero
     | chamada_funcao
     | expressao
-    | NOT fator
+   
 ;
 
 variavel: IDENT
