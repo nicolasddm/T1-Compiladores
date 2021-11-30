@@ -1,9 +1,7 @@
 program exemplo75 (input, output);
 var m,n : integer;
-p : boolean;
+p, q : boolean;
 begin
-    m := 7 - 3;
-    n := 3;
-    p := m < n;
+    n := 1;
 end.
 

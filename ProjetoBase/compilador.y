@@ -7,6 +7,7 @@
 #include <string.h>
 #include "compilador.h"
 #include "tabelaSimbolos.c"
+#include "pilha.c"
 #define TAM_COMANDO 64
 
 
@@ -16,7 +17,15 @@ char comando[TAM_COMANDO];
 int nivelLexico = 0;
 int deslocamento = 0;
 int numTipo;
+int tipo;
+int elemTipo;
+int elemAtribuicaoTipo;
+
 TabelaSimbolos *tabelaSimbolos;
+Simbolo elemento;
+Simbolo simboloElem;
+Simbolo elemAtribuicao;
+Pilha *pilhaExpressao;
 
 %}
 
@@ -32,7 +41,6 @@ TabelaSimbolos *tabelaSimbolos;
 %%
 
 programa    :{
-             tabelaSimbolos = initTabela();
              geraCodigo (NULL, "INPP");
              }
              PROGRAM IDENT
@@ -135,7 +143,8 @@ comandos: comandos PONTO_E_VIRGULA comando
 
 comando: variavel_atribuicao 
     {
-        
+        elemAtribuicao = simboloElem;
+        elemAtribuicaoTipo = elemTipo;
     }
     atribuicao
     | PONTO_E_VIRGULA
@@ -143,16 +152,22 @@ comando: variavel_atribuicao
 
 variavel_atribuicao: 
     IDENT {
-       Simbolo simbolo = buscaSimbolo(tabelaSimbolos, token);
-       printf("simbolo->ident: %s\n", simbolo.ident);
-       imprimeSimbolo(simbolo);
+        simboloElem = buscaSimbolo(tabelaSimbolos, token);
+        elemTipo = simboloElem.atributos->tipo;
+        imprimeSimbolo(simboloElem);
     }
 ;
 
 atribuicao:
     ATRIBUICAO lista_expressoes
     {
-
+        if (elemAtribuicaoTipo == retiraElemPilha(pilhaExpressao)) {
+            sprintf(comando, "ARMZ %d, %d", elemAtribuicao.atributos->nivelLexico, elemAtribuicao.atributos->deslocamento);
+            geraCodigo (NULL, comando);
+        } else {
+            printf("Tipo da variável de atribuição e valor a ser atribuido são diferentes!");
+            exit(-1);
+        }
     }
 ;
 
@@ -161,54 +176,54 @@ lista_expressoes:
     | expressao
 ;
 
-expressao: expressao_simples relacao expressao_simples { }
+expressao: 
+    expressao_simples MENOR_IGUAL expressao_simples 
+    { geraCodigo (NULL, "CMEG"); verificaTiposReturnBool(pilhaExpressao); }
+    | expressao_simples MAIOR_IGUAL expressao_simples
+    { geraCodigo (NULL, "CMAG"); verificaTiposReturnBool(pilhaExpressao); }
+    | expressao_simples MENOR expressao_simples
+    { geraCodigo (NULL, "CMME"); verificaTiposReturnBool(pilhaExpressao); }
+    | expressao_simples MAIOR expressao_simples
+    { geraCodigo (NULL, "CMMA"); verificaTiposReturnBool(pilhaExpressao); }
+    | expressao_simples IGUAL expressao_simples
+    { geraCodigo (NULL, "CMIG"); verificaTiposReturnBool(pilhaExpressao); }
+    | expressao_simples DIFERENTE expressao_simples
+    { geraCodigo (NULL, "CMDG"); verificaTiposReturnBool(pilhaExpressao); }
     | expressao_simples
 ;
 
-relacao:
-    MENOR_IGUAL
-    { geraCodigo (NULL, "CMEG"); }
-    | MAIOR_IGUAL 
-    { geraCodigo (NULL, "CMAG"); }
-    | MENOR 
-    { geraCodigo (NULL, "CMME"); }
-    | MAIOR 
-    { geraCodigo (NULL, "CMMA"); }
-    | IGUAL 
-    { geraCodigo (NULL, "CMIG"); }
-    | DIFERENTE 
-    { geraCodigo (NULL, "CMDG"); }
-;
-
 expressao_simples:
-    expressao_simples MAIS termo { geraCodigo (NULL, "SOMA"); }
-    | expressao_simples MENOS termo { geraCodigo (NULL, "SUBT"); }
-    | expressao_simples OR termo { geraCodigo (NULL, "DISJ"); } 
-    | MAIS { } termo { }
-    | MENOS { } termo { geraCodigo (NULL, "INVR");  }
-    | termo { }
+    expressao_simples MAIS termo { geraCodigo (NULL, "SOMA");  verificaTipos(pilhaExpressao);  }
+    | expressao_simples MENOS termo { geraCodigo (NULL, "SUBT");  verificaTipos(pilhaExpressao); }
+    | expressao_simples OR termo { geraCodigo (NULL, "DISJ");  verificaTiposReturnBool(pilhaExpressao); } 
+    | MAIS termo { verificaTipos(pilhaExpressao); }
+    | MENOS termo { geraCodigo (NULL, "INVR");  verificaTipos(pilhaExpressao); }
+    | termo
 ;
 
 termo:
-    termo MULTI fator { geraCodigo (NULL, "MULT"); }
-    | termo DIV fator { geraCodigo (NULL, "DIVI"); }
-    | termo AND fator { geraCodigo (NULL, "CONJ"); }
-    | fator { }
-    
-   
+    termo MULTI fator { geraCodigo (NULL, "MULT");  verificaTipos(pilhaExpressao); }
+    | termo DIV fator { geraCodigo (NULL, "DIVI");  verificaTipos(pilhaExpressao); }
+    | termo AND fator { geraCodigo (NULL, "CONJ");  verificaTiposReturnBool(pilhaExpressao); }
+    | fator
 ;
+
 
 fator: 
-    NOT fator
-    | variavel
-    | numero
-    | chamada_funcao
-    | expressao
+    variavel { insereElemPilha(pilhaExpressao, elemTipo); imprimePilha(pilhaExpressao); }
+    | NOT fator
+    | numero { insereElemPilha(pilhaExpressao, 0); imprimePilha(pilhaExpressao); }
+    | chamada_funcao { }
+    | ABRE_PARENTESES expressao FECHA_PARENTESES
    
 ;
 
-variavel: IDENT
-        | IDENT lista_expressoes
+variavel: 
+        IDENT {
+            Simbolo elemento = buscaSimbolo(tabelaSimbolos, token);
+            imprimeSimbolo(elemento);
+            elemTipo = elemento.atributos->tipo;
+        }
 
 numero: 
     NUMERO { sprintf(comando, "CRCT %s", token); geraCodigo(NULL, comando); }
@@ -220,27 +235,29 @@ chamada_funcao: ;
 %%
 
 int main (int argc, char** argv) {
-   FILE* fp;
-   extern FILE* yyin;
+    FILE* fp;
+    extern FILE* yyin;
 
-   if (argc<2 || argc>2) {
-         printf("usage compilador <arq>a %d\n", argc);
-         return(-1);
-      }
+    if (argc<2 || argc>2) {
+            printf("usage compilador <arq>a %d\n", argc);
+            return(-1);
+        }
 
-   fp=fopen (argv[1], "r");
-   if (fp == NULL) {
-      printf("usage compilador <arq>b\n");
-      return(-1);
-   }
+    fp=fopen (argv[1], "r");
+    if (fp == NULL) {
+        printf("usage compilador <arq>b\n");
+        return(-1);
+    }
 
 
 /* -------------------------------------------------------------------
  *  Inicia a Tabela de S�mbolos
  * ------------------------------------------------------------------- */
+    tabelaSimbolos = initTabela();
+    pilhaExpressao = initPilha();
 
-   yyin=fp;
-   yyparse();
+    yyin=fp;
+    yyparse();
 
-   return 0;
+    return 0;
 }

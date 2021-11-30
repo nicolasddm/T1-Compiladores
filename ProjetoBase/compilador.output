@@ -16,39 +16,37 @@ Terminals unused in grammar
     DO
 
 
-Rules useless in parser due to conflicts
-
-   49 fator: NOT fator
-
-
-State 39 conflicts: 5 shift/reduce
-State 44 conflicts: 5 shift/reduce, 16 reduce/reduce
-State 47 conflicts: 5 shift/reduce
-State 49 conflicts: 5 shift/reduce, 1 reduce/reduce
-State 50 conflicts: 16 reduce/reduce
-State 51 conflicts: 9 shift/reduce
-State 52 conflicts: 3 shift/reduce
-State 58 conflicts: 5 shift/reduce, 16 reduce/reduce
-State 59 conflicts: 5 shift/reduce
-State 60 conflicts: 5 shift/reduce
-State 62 conflicts: 16 reduce/reduce
-State 63 conflicts: 16 reduce/reduce
-State 70 conflicts: 5 shift/reduce
-State 71 conflicts: 5 shift/reduce
-State 72 conflicts: 5 shift/reduce
-State 73 conflicts: 5 shift/reduce
-State 74 conflicts: 5 shift/reduce
-State 75 conflicts: 5 shift/reduce
-State 76 conflicts: 5 shift/reduce
-State 78 conflicts: 3 shift/reduce, 16 reduce/reduce
-State 79 conflicts: 3 shift/reduce, 16 reduce/reduce
-State 80 conflicts: 3 shift/reduce, 16 reduce/reduce
-State 81 conflicts: 3 shift/reduce, 16 reduce/reduce
-State 82 conflicts: 3 shift/reduce, 16 reduce/reduce
-State 83 conflicts: 9 shift/reduce, 16 reduce/reduce
-State 84 conflicts: 16 reduce/reduce
-State 85 conflicts: 16 reduce/reduce
-State 86 conflicts: 16 reduce/reduce
+State 39 conflicts: 6 shift/reduce
+State 44 conflicts: 2 shift/reduce
+State 46 conflicts: 4 shift/reduce
+State 47 conflicts: 4 shift/reduce
+State 48 conflicts: 4 shift/reduce
+State 50 conflicts: 6 shift/reduce, 1 reduce/reduce
+State 52 conflicts: 9 shift/reduce
+State 53 conflicts: 3 shift/reduce
+State 60 conflicts: 3 shift/reduce
+State 61 conflicts: 3 shift/reduce
+State 64 conflicts: 6 shift/reduce
+State 65 conflicts: 6 shift/reduce
+State 66 conflicts: 6 shift/reduce
+State 67 conflicts: 6 shift/reduce
+State 68 conflicts: 6 shift/reduce
+State 69 conflicts: 6 shift/reduce
+State 70 conflicts: 4 shift/reduce
+State 71 conflicts: 4 shift/reduce
+State 72 conflicts: 4 shift/reduce
+State 73 conflicts: 4 shift/reduce
+State 74 conflicts: 4 shift/reduce
+State 75 conflicts: 4 shift/reduce
+State 78 conflicts: 3 shift/reduce
+State 79 conflicts: 3 shift/reduce
+State 80 conflicts: 3 shift/reduce
+State 81 conflicts: 3 shift/reduce
+State 82 conflicts: 3 shift/reduce
+State 83 conflicts: 3 shift/reduce
+State 84 conflicts: 3 shift/reduce
+State 85 conflicts: 3 shift/reduce
+State 86 conflicts: 3 shift/reduce
 
 
 Grammar
@@ -104,46 +102,37 @@ Grammar
    27 lista_expressoes: lista_expressoes expressao
    28                 | expressao
 
-   29 expressao: expressao_simples relacao expressao_simples
-   30          | expressao_simples
+   29 expressao: expressao_simples MENOR_IGUAL expressao_simples
+   30          | expressao_simples MAIOR_IGUAL expressao_simples
+   31          | expressao_simples MENOR expressao_simples
+   32          | expressao_simples MAIOR expressao_simples
+   33          | expressao_simples IGUAL expressao_simples
+   34          | expressao_simples DIFERENTE expressao_simples
+   35          | expressao_simples
 
-   31 relacao: MENOR_IGUAL
-   32        | MAIOR_IGUAL
-   33        | MENOR
-   34        | MAIOR
-   35        | IGUAL
-   36        | DIFERENTE
+   36 expressao_simples: expressao_simples MAIS termo
+   37                  | expressao_simples MENOS termo
+   38                  | expressao_simples OR termo
+   39                  | MAIS termo
+   40                  | MENOS termo
+   41                  | termo
 
-   37 expressao_simples: expressao_simples MAIS termo
-   38                  | expressao_simples MENOS termo
-   39                  | expressao_simples OR termo
+   42 termo: termo MULTI fator
+   43      | termo DIV fator
+   44      | termo AND fator
+   45      | fator
 
-   40 $@7: %empty
+   46 fator: variavel
+   47      | NOT fator
+   48      | numero
+   49      | chamada_funcao
+   50      | ABRE_PARENTESES expressao FECHA_PARENTESES
 
-   41 expressao_simples: MAIS $@7 termo
+   51 variavel: IDENT
 
-   42 $@8: %empty
+   52 numero: NUMERO
 
-   43 expressao_simples: MENOS $@8 termo
-   44                  | termo
-
-   45 termo: termo MULTI fator
-   46      | termo DIV fator
-   47      | termo AND fator
-   48      | fator
-
-   49 fator: NOT fator
-   50      | variavel
-   51      | numero
-   52      | chamada_funcao
-   53      | expressao
-
-   54 variavel: IDENT
-   55         | IDENT lista_expressoes
-
-   56 numero: NUMERO
-
-   57 chamada_funcao: %empty
+   53 chamada_funcao: %empty
 
 
 Terminals, with rules where they appear
@@ -151,8 +140,8 @@ Terminals, with rules where they appear
     $end (0) 0
     error (256)
     PROGRAM (258) 2
-    ABRE_PARENTESES (259) 2
-    FECHA_PARENTESES (260) 2
+    ABRE_PARENTESES (259) 2 50
+    FECHA_PARENTESES (260) 2 50
     VIRGULA (261) 15 17
     PONTO_E_VIRGULA (262) 2 13 19 20 24
     DOIS_PONTOS (263) 13
@@ -160,7 +149,7 @@ Terminals, with rules where they appear
     T_BEGIN (265) 19
     T_END (266) 19
     VAR (267) 7
-    IDENT (268) 2 14 15 16 17 18 25 54 55
+    IDENT (268) 2 14 15 16 17 18 25 51
     ATRIBUICAO (269) 26
     WRITE (270)
     READ (271)
@@ -176,20 +165,20 @@ Terminals, with rules where they appear
     ELSE (281)
     WHILE (282)
     DO (283)
-    IGUAL (284) 35
-    DIFERENTE (285) 36
-    MENOR_IGUAL (286) 31
-    MAIOR_IGUAL (287) 32
-    MENOR (288) 33
-    MAIOR (289) 34
-    MAIS (290) 37 41
-    MENOS (291) 38 43
-    OR (292) 39
-    MULTI (293) 45
-    DIV (294) 46
-    AND (295) 47
-    NOT (296) 49
-    NUMERO (297) 56
+    IGUAL (284) 33
+    DIFERENTE (285) 34
+    MENOR_IGUAL (286) 29
+    MAIOR_IGUAL (287) 30
+    MENOR (288) 31
+    MAIOR (289) 32
+    MAIS (290) 36 39
+    MENOS (291) 37 40
+    OR (292) 38
+    MULTI (293) 42
+    DIV (294) 43
+    AND (295) 44
+    NOT (296) 47
+    NUMERO (297) 52
 
 
 Nonterminals, with rules where they appear
@@ -258,37 +247,28 @@ Nonterminals, with rules where they appear
         on right: 23
     lista_expressoes (64)
         on left: 27 28
-        on right: 26 27 55
+        on right: 26 27
     expressao (65)
-        on left: 29 30
-        on right: 27 28 53
-    relacao (66)
-        on left: 31 32 33 34 35 36
-        on right: 29
-    expressao_simples (67)
-        on left: 37 38 39 41 43 44
-        on right: 29 30 37 38 39
-    $@7 (68)
-        on left: 40
-        on right: 41
-    $@8 (69)
-        on left: 42
-        on right: 43
-    termo (70)
-        on left: 45 46 47 48
-        on right: 37 38 39 41 43 44 45 46 47
-    fator (71)
-        on left: 49 50 51 52 53
-        on right: 45 46 47 48 49
-    variavel (72)
-        on left: 54 55
-        on right: 50
-    numero (73)
-        on left: 56
-        on right: 51
-    chamada_funcao (74)
-        on left: 57
-        on right: 52
+        on left: 29 30 31 32 33 34 35
+        on right: 27 28 50
+    expressao_simples (66)
+        on left: 36 37 38 39 40 41
+        on right: 29 30 31 32 33 34 35 36 37 38
+    termo (67)
+        on left: 42 43 44 45
+        on right: 36 37 38 39 40 41 42 43 44
+    fator (68)
+        on left: 46 47 48 49 50
+        on right: 42 43 44 45 47
+    variavel (69)
+        on left: 51
+        on right: 46
+    numero (70)
+        on left: 52
+        on right: 48
+    chamada_funcao (71)
+        on left: 53
+        on right: 49
 
 
 State 0
@@ -616,27 +596,29 @@ State 39
 
    26 atribuicao: ATRIBUICAO . lista_expressoes
 
-    IDENT   shift, and go to state 44
-    MAIS    shift, and go to state 45
-    MENOS   shift, and go to state 46
-    NOT     shift, and go to state 47
-    NUMERO  shift, and go to state 48
+    ABRE_PARENTESES  shift, and go to state 44
+    IDENT            shift, and go to state 45
+    MAIS             shift, and go to state 46
+    MENOS            shift, and go to state 47
+    NOT              shift, and go to state 48
+    NUMERO           shift, and go to state 49
 
-    IDENT     [reduce using rule 57 (chamada_funcao)]
-    MAIS      [reduce using rule 57 (chamada_funcao)]
-    MENOS     [reduce using rule 57 (chamada_funcao)]
-    NOT       [reduce using rule 57 (chamada_funcao)]
-    NUMERO    [reduce using rule 57 (chamada_funcao)]
-    $default  reduce using rule 57 (chamada_funcao)
+    ABRE_PARENTESES  [reduce using rule 53 (chamada_funcao)]
+    IDENT            [reduce using rule 53 (chamada_funcao)]
+    MAIS             [reduce using rule 53 (chamada_funcao)]
+    MENOS            [reduce using rule 53 (chamada_funcao)]
+    NOT              [reduce using rule 53 (chamada_funcao)]
+    NUMERO           [reduce using rule 53 (chamada_funcao)]
+    $default         reduce using rule 53 (chamada_funcao)
 
-    lista_expressoes   go to state 49
-    expressao          go to state 50
-    expressao_simples  go to state 51
-    termo              go to state 52
-    fator              go to state 53
-    variavel           go to state 54
-    numero             go to state 55
-    chamada_funcao     go to state 56
+    lista_expressoes   go to state 50
+    expressao          go to state 51
+    expressao_simples  go to state 52
+    termo              go to state 53
+    fator              go to state 54
+    variavel           go to state 55
+    numero             go to state 56
+    chamada_funcao     go to state 57
 
 
 State 40
@@ -666,191 +648,162 @@ State 43
 
     $default  reduce using rule 12 ($@5)
 
-    $@5  go to state 57
+    $@5  go to state 58
 
 
 State 44
 
-   54 variavel: IDENT .
-   55         | IDENT . lista_expressoes
+   50 fator: ABRE_PARENTESES . expressao FECHA_PARENTESES
 
-    IDENT   shift, and go to state 44
-    MAIS    shift, and go to state 45
-    MENOS   shift, and go to state 46
-    NOT     shift, and go to state 47
-    NUMERO  shift, and go to state 48
+    ABRE_PARENTESES  shift, and go to state 44
+    IDENT            shift, and go to state 45
+    MAIS             shift, and go to state 46
+    MENOS            shift, and go to state 47
+    NOT              shift, and go to state 48
+    NUMERO           shift, and go to state 49
 
-    PONTO_E_VIRGULA  reduce using rule 54 (variavel)
-    PONTO_E_VIRGULA  [reduce using rule 57 (chamada_funcao)]
-    IDENT            [reduce using rule 54 (variavel)]
-    IDENT            [reduce using rule 57 (chamada_funcao)]
-    IGUAL            reduce using rule 54 (variavel)
-    IGUAL            [reduce using rule 57 (chamada_funcao)]
-    DIFERENTE        reduce using rule 54 (variavel)
-    DIFERENTE        [reduce using rule 57 (chamada_funcao)]
-    MENOR_IGUAL      reduce using rule 54 (variavel)
-    MENOR_IGUAL      [reduce using rule 57 (chamada_funcao)]
-    MAIOR_IGUAL      reduce using rule 54 (variavel)
-    MAIOR_IGUAL      [reduce using rule 57 (chamada_funcao)]
-    MENOR            reduce using rule 54 (variavel)
-    MENOR            [reduce using rule 57 (chamada_funcao)]
-    MAIOR            reduce using rule 54 (variavel)
-    MAIOR            [reduce using rule 57 (chamada_funcao)]
-    MAIS             [reduce using rule 54 (variavel)]
-    MAIS             [reduce using rule 57 (chamada_funcao)]
-    MENOS            [reduce using rule 54 (variavel)]
-    MENOS            [reduce using rule 57 (chamada_funcao)]
-    OR               reduce using rule 54 (variavel)
-    OR               [reduce using rule 57 (chamada_funcao)]
-    MULTI            reduce using rule 54 (variavel)
-    MULTI            [reduce using rule 57 (chamada_funcao)]
-    DIV              reduce using rule 54 (variavel)
-    DIV              [reduce using rule 57 (chamada_funcao)]
-    AND              reduce using rule 54 (variavel)
-    AND              [reduce using rule 57 (chamada_funcao)]
-    NOT              [reduce using rule 54 (variavel)]
-    NOT              [reduce using rule 57 (chamada_funcao)]
-    NUMERO           [reduce using rule 54 (variavel)]
-    NUMERO           [reduce using rule 57 (chamada_funcao)]
-    $default         reduce using rule 54 (variavel)
+    MAIS      [reduce using rule 53 (chamada_funcao)]
+    MENOS     [reduce using rule 53 (chamada_funcao)]
+    $default  reduce using rule 53 (chamada_funcao)
 
-    lista_expressoes   go to state 58
-    expressao          go to state 50
-    expressao_simples  go to state 51
-    termo              go to state 52
-    fator              go to state 53
-    variavel           go to state 54
-    numero             go to state 55
-    chamada_funcao     go to state 56
+    expressao          go to state 59
+    expressao_simples  go to state 52
+    termo              go to state 53
+    fator              go to state 54
+    variavel           go to state 55
+    numero             go to state 56
+    chamada_funcao     go to state 57
 
 
 State 45
 
-   41 expressao_simples: MAIS . $@7 termo
+   51 variavel: IDENT .
 
-    $default  reduce using rule 40 ($@7)
-
-    $@7  go to state 59
+    $default  reduce using rule 51 (variavel)
 
 
 State 46
 
-   43 expressao_simples: MENOS . $@8 termo
+   39 expressao_simples: MAIS . termo
 
-    $default  reduce using rule 42 ($@8)
+    ABRE_PARENTESES  shift, and go to state 44
+    IDENT            shift, and go to state 45
+    NOT              shift, and go to state 48
+    NUMERO           shift, and go to state 49
 
-    $@8  go to state 60
+    ABRE_PARENTESES  [reduce using rule 53 (chamada_funcao)]
+    IDENT            [reduce using rule 53 (chamada_funcao)]
+    NOT              [reduce using rule 53 (chamada_funcao)]
+    NUMERO           [reduce using rule 53 (chamada_funcao)]
+    $default         reduce using rule 53 (chamada_funcao)
+
+    termo           go to state 60
+    fator           go to state 54
+    variavel        go to state 55
+    numero          go to state 56
+    chamada_funcao  go to state 57
 
 
 State 47
 
-   49 fator: NOT . fator
+   40 expressao_simples: MENOS . termo
 
-    IDENT   shift, and go to state 44
-    MAIS    shift, and go to state 45
-    MENOS   shift, and go to state 46
-    NOT     shift, and go to state 47
-    NUMERO  shift, and go to state 48
+    ABRE_PARENTESES  shift, and go to state 44
+    IDENT            shift, and go to state 45
+    NOT              shift, and go to state 48
+    NUMERO           shift, and go to state 49
 
-    IDENT     [reduce using rule 57 (chamada_funcao)]
-    MAIS      [reduce using rule 57 (chamada_funcao)]
-    MENOS     [reduce using rule 57 (chamada_funcao)]
-    NOT       [reduce using rule 57 (chamada_funcao)]
-    NUMERO    [reduce using rule 57 (chamada_funcao)]
-    $default  reduce using rule 57 (chamada_funcao)
+    ABRE_PARENTESES  [reduce using rule 53 (chamada_funcao)]
+    IDENT            [reduce using rule 53 (chamada_funcao)]
+    NOT              [reduce using rule 53 (chamada_funcao)]
+    NUMERO           [reduce using rule 53 (chamada_funcao)]
+    $default         reduce using rule 53 (chamada_funcao)
 
-    expressao          go to state 61
-    expressao_simples  go to state 51
-    termo              go to state 52
-    fator              go to state 62
-    variavel           go to state 54
-    numero             go to state 55
-    chamada_funcao     go to state 56
+    termo           go to state 61
+    fator           go to state 54
+    variavel        go to state 55
+    numero          go to state 56
+    chamada_funcao  go to state 57
 
 
 State 48
 
-   56 numero: NUMERO .
+   47 fator: NOT . fator
 
-    $default  reduce using rule 56 (numero)
+    ABRE_PARENTESES  shift, and go to state 44
+    IDENT            shift, and go to state 45
+    NOT              shift, and go to state 48
+    NUMERO           shift, and go to state 49
+
+    ABRE_PARENTESES  [reduce using rule 53 (chamada_funcao)]
+    IDENT            [reduce using rule 53 (chamada_funcao)]
+    NOT              [reduce using rule 53 (chamada_funcao)]
+    NUMERO           [reduce using rule 53 (chamada_funcao)]
+    $default         reduce using rule 53 (chamada_funcao)
+
+    fator           go to state 62
+    variavel        go to state 55
+    numero          go to state 56
+    chamada_funcao  go to state 57
 
 
 State 49
 
-   26 atribuicao: ATRIBUICAO lista_expressoes .
-   27 lista_expressoes: lista_expressoes . expressao
+   52 numero: NUMERO .
 
-    IDENT   shift, and go to state 44
-    MAIS    shift, and go to state 45
-    MENOS   shift, and go to state 46
-    NOT     shift, and go to state 47
-    NUMERO  shift, and go to state 48
-
-    PONTO_E_VIRGULA  reduce using rule 26 (atribuicao)
-    PONTO_E_VIRGULA  [reduce using rule 57 (chamada_funcao)]
-    IDENT            [reduce using rule 57 (chamada_funcao)]
-    MAIS             [reduce using rule 57 (chamada_funcao)]
-    MENOS            [reduce using rule 57 (chamada_funcao)]
-    NOT              [reduce using rule 57 (chamada_funcao)]
-    NUMERO           [reduce using rule 57 (chamada_funcao)]
-    $default         reduce using rule 57 (chamada_funcao)
-
-    expressao          go to state 63
-    expressao_simples  go to state 51
-    termo              go to state 52
-    fator              go to state 53
-    variavel           go to state 54
-    numero             go to state 55
-    chamada_funcao     go to state 56
+    $default  reduce using rule 52 (numero)
 
 
 State 50
 
-   28 lista_expressoes: expressao .
-   53 fator: expressao .
+   26 atribuicao: ATRIBUICAO lista_expressoes .
+   27 lista_expressoes: lista_expressoes . expressao
 
-    PONTO_E_VIRGULA  reduce using rule 28 (lista_expressoes)
-    PONTO_E_VIRGULA  [reduce using rule 53 (fator)]
-    IDENT            reduce using rule 28 (lista_expressoes)
-    IDENT            [reduce using rule 53 (fator)]
-    IGUAL            reduce using rule 28 (lista_expressoes)
-    IGUAL            [reduce using rule 53 (fator)]
-    DIFERENTE        reduce using rule 28 (lista_expressoes)
-    DIFERENTE        [reduce using rule 53 (fator)]
-    MENOR_IGUAL      reduce using rule 28 (lista_expressoes)
-    MENOR_IGUAL      [reduce using rule 53 (fator)]
-    MAIOR_IGUAL      reduce using rule 28 (lista_expressoes)
-    MAIOR_IGUAL      [reduce using rule 53 (fator)]
-    MENOR            reduce using rule 28 (lista_expressoes)
-    MENOR            [reduce using rule 53 (fator)]
-    MAIOR            reduce using rule 28 (lista_expressoes)
-    MAIOR            [reduce using rule 53 (fator)]
-    MAIS             reduce using rule 28 (lista_expressoes)
-    MAIS             [reduce using rule 53 (fator)]
-    MENOS            reduce using rule 28 (lista_expressoes)
-    MENOS            [reduce using rule 53 (fator)]
-    OR               reduce using rule 28 (lista_expressoes)
-    OR               [reduce using rule 53 (fator)]
-    MULTI            reduce using rule 28 (lista_expressoes)
-    MULTI            [reduce using rule 53 (fator)]
-    DIV              reduce using rule 28 (lista_expressoes)
-    DIV              [reduce using rule 53 (fator)]
-    AND              reduce using rule 28 (lista_expressoes)
-    AND              [reduce using rule 53 (fator)]
-    NOT              reduce using rule 28 (lista_expressoes)
-    NOT              [reduce using rule 53 (fator)]
-    NUMERO           reduce using rule 28 (lista_expressoes)
-    NUMERO           [reduce using rule 53 (fator)]
-    $default         reduce using rule 28 (lista_expressoes)
+    ABRE_PARENTESES  shift, and go to state 44
+    IDENT            shift, and go to state 45
+    MAIS             shift, and go to state 46
+    MENOS            shift, and go to state 47
+    NOT              shift, and go to state 48
+    NUMERO           shift, and go to state 49
+
+    ABRE_PARENTESES  [reduce using rule 53 (chamada_funcao)]
+    PONTO_E_VIRGULA  reduce using rule 26 (atribuicao)
+    PONTO_E_VIRGULA  [reduce using rule 53 (chamada_funcao)]
+    IDENT            [reduce using rule 53 (chamada_funcao)]
+    MAIS             [reduce using rule 53 (chamada_funcao)]
+    MENOS            [reduce using rule 53 (chamada_funcao)]
+    NOT              [reduce using rule 53 (chamada_funcao)]
+    NUMERO           [reduce using rule 53 (chamada_funcao)]
+    $default         reduce using rule 53 (chamada_funcao)
+
+    expressao          go to state 63
+    expressao_simples  go to state 52
+    termo              go to state 53
+    fator              go to state 54
+    variavel           go to state 55
+    numero             go to state 56
+    chamada_funcao     go to state 57
 
 
 State 51
 
-   29 expressao: expressao_simples . relacao expressao_simples
-   30          | expressao_simples .
-   37 expressao_simples: expressao_simples . MAIS termo
-   38                  | expressao_simples . MENOS termo
-   39                  | expressao_simples . OR termo
+   28 lista_expressoes: expressao .
+
+    $default  reduce using rule 28 (lista_expressoes)
+
+
+State 52
+
+   29 expressao: expressao_simples . MENOR_IGUAL expressao_simples
+   30          | expressao_simples . MAIOR_IGUAL expressao_simples
+   31          | expressao_simples . MENOR expressao_simples
+   32          | expressao_simples . MAIOR expressao_simples
+   33          | expressao_simples . IGUAL expressao_simples
+   34          | expressao_simples . DIFERENTE expressao_simples
+   35          | expressao_simples .
+   36 expressao_simples: expressao_simples . MAIS termo
+   37                  | expressao_simples . MENOS termo
+   38                  | expressao_simples . OR termo
 
     IGUAL        shift, and go to state 64
     DIFERENTE    shift, and go to state 65
@@ -862,902 +815,599 @@ State 51
     MENOS        shift, and go to state 71
     OR           shift, and go to state 72
 
-    IGUAL        [reduce using rule 30 (expressao)]
-    DIFERENTE    [reduce using rule 30 (expressao)]
-    MENOR_IGUAL  [reduce using rule 30 (expressao)]
-    MAIOR_IGUAL  [reduce using rule 30 (expressao)]
-    MENOR        [reduce using rule 30 (expressao)]
-    MAIOR        [reduce using rule 30 (expressao)]
-    MAIS         [reduce using rule 30 (expressao)]
-    MENOS        [reduce using rule 30 (expressao)]
-    OR           [reduce using rule 30 (expressao)]
-    $default     reduce using rule 30 (expressao)
-
-    relacao  go to state 73
-
-
-State 52
-
-   44 expressao_simples: termo .
-   45 termo: termo . MULTI fator
-   46      | termo . DIV fator
-   47      | termo . AND fator
-
-    MULTI  shift, and go to state 74
-    DIV    shift, and go to state 75
-    AND    shift, and go to state 76
-
-    MULTI     [reduce using rule 44 (expressao_simples)]
-    DIV       [reduce using rule 44 (expressao_simples)]
-    AND       [reduce using rule 44 (expressao_simples)]
-    $default  reduce using rule 44 (expressao_simples)
+    IGUAL        [reduce using rule 35 (expressao)]
+    DIFERENTE    [reduce using rule 35 (expressao)]
+    MENOR_IGUAL  [reduce using rule 35 (expressao)]
+    MAIOR_IGUAL  [reduce using rule 35 (expressao)]
+    MENOR        [reduce using rule 35 (expressao)]
+    MAIOR        [reduce using rule 35 (expressao)]
+    MAIS         [reduce using rule 35 (expressao)]
+    MENOS        [reduce using rule 35 (expressao)]
+    OR           [reduce using rule 35 (expressao)]
+    $default     reduce using rule 35 (expressao)
 
 
 State 53
 
-   48 termo: fator .
+   41 expressao_simples: termo .
+   42 termo: termo . MULTI fator
+   43      | termo . DIV fator
+   44      | termo . AND fator
 
-    $default  reduce using rule 48 (termo)
+    MULTI  shift, and go to state 73
+    DIV    shift, and go to state 74
+    AND    shift, and go to state 75
+
+    MULTI     [reduce using rule 41 (expressao_simples)]
+    DIV       [reduce using rule 41 (expressao_simples)]
+    AND       [reduce using rule 41 (expressao_simples)]
+    $default  reduce using rule 41 (expressao_simples)
 
 
 State 54
 
-   50 fator: variavel .
+   45 termo: fator .
 
-    $default  reduce using rule 50 (fator)
+    $default  reduce using rule 45 (termo)
 
 
 State 55
 
-   51 fator: numero .
+   46 fator: variavel .
 
-    $default  reduce using rule 51 (fator)
+    $default  reduce using rule 46 (fator)
 
 
 State 56
 
-   52 fator: chamada_funcao .
+   48 fator: numero .
 
-    $default  reduce using rule 52 (fator)
+    $default  reduce using rule 48 (fator)
 
 
 State 57
 
-   13 declara_var: $@4 lista_id_var DOIS_PONTOS tipo $@5 . PONTO_E_VIRGULA
+   49 fator: chamada_funcao .
 
-    PONTO_E_VIRGULA  shift, and go to state 77
+    $default  reduce using rule 49 (fator)
 
 
 State 58
 
-   27 lista_expressoes: lista_expressoes . expressao
-   55 variavel: IDENT lista_expressoes .
+   13 declara_var: $@4 lista_id_var DOIS_PONTOS tipo $@5 . PONTO_E_VIRGULA
 
-    IDENT   shift, and go to state 44
-    MAIS    shift, and go to state 45
-    MENOS   shift, and go to state 46
-    NOT     shift, and go to state 47
-    NUMERO  shift, and go to state 48
-
-    PONTO_E_VIRGULA  reduce using rule 55 (variavel)
-    PONTO_E_VIRGULA  [reduce using rule 57 (chamada_funcao)]
-    IDENT            [reduce using rule 55 (variavel)]
-    IDENT            [reduce using rule 57 (chamada_funcao)]
-    IGUAL            reduce using rule 55 (variavel)
-    IGUAL            [reduce using rule 57 (chamada_funcao)]
-    DIFERENTE        reduce using rule 55 (variavel)
-    DIFERENTE        [reduce using rule 57 (chamada_funcao)]
-    MENOR_IGUAL      reduce using rule 55 (variavel)
-    MENOR_IGUAL      [reduce using rule 57 (chamada_funcao)]
-    MAIOR_IGUAL      reduce using rule 55 (variavel)
-    MAIOR_IGUAL      [reduce using rule 57 (chamada_funcao)]
-    MENOR            reduce using rule 55 (variavel)
-    MENOR            [reduce using rule 57 (chamada_funcao)]
-    MAIOR            reduce using rule 55 (variavel)
-    MAIOR            [reduce using rule 57 (chamada_funcao)]
-    MAIS             [reduce using rule 55 (variavel)]
-    MAIS             [reduce using rule 57 (chamada_funcao)]
-    MENOS            [reduce using rule 55 (variavel)]
-    MENOS            [reduce using rule 57 (chamada_funcao)]
-    OR               reduce using rule 55 (variavel)
-    OR               [reduce using rule 57 (chamada_funcao)]
-    MULTI            reduce using rule 55 (variavel)
-    MULTI            [reduce using rule 57 (chamada_funcao)]
-    DIV              reduce using rule 55 (variavel)
-    DIV              [reduce using rule 57 (chamada_funcao)]
-    AND              reduce using rule 55 (variavel)
-    AND              [reduce using rule 57 (chamada_funcao)]
-    NOT              [reduce using rule 55 (variavel)]
-    NOT              [reduce using rule 57 (chamada_funcao)]
-    NUMERO           [reduce using rule 55 (variavel)]
-    NUMERO           [reduce using rule 57 (chamada_funcao)]
-    $default         reduce using rule 55 (variavel)
-
-    expressao          go to state 63
-    expressao_simples  go to state 51
-    termo              go to state 52
-    fator              go to state 53
-    variavel           go to state 54
-    numero             go to state 55
-    chamada_funcao     go to state 56
+    PONTO_E_VIRGULA  shift, and go to state 76
 
 
 State 59
 
-   41 expressao_simples: MAIS $@7 . termo
+   50 fator: ABRE_PARENTESES expressao . FECHA_PARENTESES
 
-    IDENT   shift, and go to state 44
-    MAIS    shift, and go to state 45
-    MENOS   shift, and go to state 46
-    NOT     shift, and go to state 47
-    NUMERO  shift, and go to state 48
-
-    IDENT     [reduce using rule 57 (chamada_funcao)]
-    MAIS      [reduce using rule 57 (chamada_funcao)]
-    MENOS     [reduce using rule 57 (chamada_funcao)]
-    NOT       [reduce using rule 57 (chamada_funcao)]
-    NUMERO    [reduce using rule 57 (chamada_funcao)]
-    $default  reduce using rule 57 (chamada_funcao)
-
-    expressao          go to state 61
-    expressao_simples  go to state 51
-    termo              go to state 78
-    fator              go to state 53
-    variavel           go to state 54
-    numero             go to state 55
-    chamada_funcao     go to state 56
+    FECHA_PARENTESES  shift, and go to state 77
 
 
 State 60
 
-   43 expressao_simples: MENOS $@8 . termo
+   39 expressao_simples: MAIS termo .
+   42 termo: termo . MULTI fator
+   43      | termo . DIV fator
+   44      | termo . AND fator
 
-    IDENT   shift, and go to state 44
-    MAIS    shift, and go to state 45
-    MENOS   shift, and go to state 46
-    NOT     shift, and go to state 47
-    NUMERO  shift, and go to state 48
+    MULTI  shift, and go to state 73
+    DIV    shift, and go to state 74
+    AND    shift, and go to state 75
 
-    IDENT     [reduce using rule 57 (chamada_funcao)]
-    MAIS      [reduce using rule 57 (chamada_funcao)]
-    MENOS     [reduce using rule 57 (chamada_funcao)]
-    NOT       [reduce using rule 57 (chamada_funcao)]
-    NUMERO    [reduce using rule 57 (chamada_funcao)]
-    $default  reduce using rule 57 (chamada_funcao)
-
-    expressao          go to state 61
-    expressao_simples  go to state 51
-    termo              go to state 79
-    fator              go to state 53
-    variavel           go to state 54
-    numero             go to state 55
-    chamada_funcao     go to state 56
+    MULTI     [reduce using rule 39 (expressao_simples)]
+    DIV       [reduce using rule 39 (expressao_simples)]
+    AND       [reduce using rule 39 (expressao_simples)]
+    $default  reduce using rule 39 (expressao_simples)
 
 
 State 61
 
-   53 fator: expressao .
+   40 expressao_simples: MENOS termo .
+   42 termo: termo . MULTI fator
+   43      | termo . DIV fator
+   44      | termo . AND fator
 
-    $default  reduce using rule 53 (fator)
+    MULTI  shift, and go to state 73
+    DIV    shift, and go to state 74
+    AND    shift, and go to state 75
+
+    MULTI     [reduce using rule 40 (expressao_simples)]
+    DIV       [reduce using rule 40 (expressao_simples)]
+    AND       [reduce using rule 40 (expressao_simples)]
+    $default  reduce using rule 40 (expressao_simples)
 
 
 State 62
 
-   48 termo: fator .
-   49 fator: NOT fator .
+   47 fator: NOT fator .
 
-    PONTO_E_VIRGULA  reduce using rule 48 (termo)
-    PONTO_E_VIRGULA  [reduce using rule 49 (fator)]
-    IDENT            reduce using rule 48 (termo)
-    IDENT            [reduce using rule 49 (fator)]
-    IGUAL            reduce using rule 48 (termo)
-    IGUAL            [reduce using rule 49 (fator)]
-    DIFERENTE        reduce using rule 48 (termo)
-    DIFERENTE        [reduce using rule 49 (fator)]
-    MENOR_IGUAL      reduce using rule 48 (termo)
-    MENOR_IGUAL      [reduce using rule 49 (fator)]
-    MAIOR_IGUAL      reduce using rule 48 (termo)
-    MAIOR_IGUAL      [reduce using rule 49 (fator)]
-    MENOR            reduce using rule 48 (termo)
-    MENOR            [reduce using rule 49 (fator)]
-    MAIOR            reduce using rule 48 (termo)
-    MAIOR            [reduce using rule 49 (fator)]
-    MAIS             reduce using rule 48 (termo)
-    MAIS             [reduce using rule 49 (fator)]
-    MENOS            reduce using rule 48 (termo)
-    MENOS            [reduce using rule 49 (fator)]
-    OR               reduce using rule 48 (termo)
-    OR               [reduce using rule 49 (fator)]
-    MULTI            reduce using rule 48 (termo)
-    MULTI            [reduce using rule 49 (fator)]
-    DIV              reduce using rule 48 (termo)
-    DIV              [reduce using rule 49 (fator)]
-    AND              reduce using rule 48 (termo)
-    AND              [reduce using rule 49 (fator)]
-    NOT              reduce using rule 48 (termo)
-    NOT              [reduce using rule 49 (fator)]
-    NUMERO           reduce using rule 48 (termo)
-    NUMERO           [reduce using rule 49 (fator)]
-    $default         reduce using rule 48 (termo)
+    $default  reduce using rule 47 (fator)
 
 
 State 63
 
    27 lista_expressoes: lista_expressoes expressao .
-   53 fator: expressao .
 
-    PONTO_E_VIRGULA  reduce using rule 27 (lista_expressoes)
-    PONTO_E_VIRGULA  [reduce using rule 53 (fator)]
-    IDENT            reduce using rule 27 (lista_expressoes)
-    IDENT            [reduce using rule 53 (fator)]
-    IGUAL            reduce using rule 27 (lista_expressoes)
-    IGUAL            [reduce using rule 53 (fator)]
-    DIFERENTE        reduce using rule 27 (lista_expressoes)
-    DIFERENTE        [reduce using rule 53 (fator)]
-    MENOR_IGUAL      reduce using rule 27 (lista_expressoes)
-    MENOR_IGUAL      [reduce using rule 53 (fator)]
-    MAIOR_IGUAL      reduce using rule 27 (lista_expressoes)
-    MAIOR_IGUAL      [reduce using rule 53 (fator)]
-    MENOR            reduce using rule 27 (lista_expressoes)
-    MENOR            [reduce using rule 53 (fator)]
-    MAIOR            reduce using rule 27 (lista_expressoes)
-    MAIOR            [reduce using rule 53 (fator)]
-    MAIS             reduce using rule 27 (lista_expressoes)
-    MAIS             [reduce using rule 53 (fator)]
-    MENOS            reduce using rule 27 (lista_expressoes)
-    MENOS            [reduce using rule 53 (fator)]
-    OR               reduce using rule 27 (lista_expressoes)
-    OR               [reduce using rule 53 (fator)]
-    MULTI            reduce using rule 27 (lista_expressoes)
-    MULTI            [reduce using rule 53 (fator)]
-    DIV              reduce using rule 27 (lista_expressoes)
-    DIV              [reduce using rule 53 (fator)]
-    AND              reduce using rule 27 (lista_expressoes)
-    AND              [reduce using rule 53 (fator)]
-    NOT              reduce using rule 27 (lista_expressoes)
-    NOT              [reduce using rule 53 (fator)]
-    NUMERO           reduce using rule 27 (lista_expressoes)
-    NUMERO           [reduce using rule 53 (fator)]
-    $default         reduce using rule 27 (lista_expressoes)
+    $default  reduce using rule 27 (lista_expressoes)
 
 
 State 64
 
-   35 relacao: IGUAL .
+   33 expressao: expressao_simples IGUAL . expressao_simples
 
-    $default  reduce using rule 35 (relacao)
+    ABRE_PARENTESES  shift, and go to state 44
+    IDENT            shift, and go to state 45
+    MAIS             shift, and go to state 46
+    MENOS            shift, and go to state 47
+    NOT              shift, and go to state 48
+    NUMERO           shift, and go to state 49
+
+    ABRE_PARENTESES  [reduce using rule 53 (chamada_funcao)]
+    IDENT            [reduce using rule 53 (chamada_funcao)]
+    MAIS             [reduce using rule 53 (chamada_funcao)]
+    MENOS            [reduce using rule 53 (chamada_funcao)]
+    NOT              [reduce using rule 53 (chamada_funcao)]
+    NUMERO           [reduce using rule 53 (chamada_funcao)]
+    $default         reduce using rule 53 (chamada_funcao)
+
+    expressao_simples  go to state 78
+    termo              go to state 53
+    fator              go to state 54
+    variavel           go to state 55
+    numero             go to state 56
+    chamada_funcao     go to state 57
 
 
 State 65
 
-   36 relacao: DIFERENTE .
+   34 expressao: expressao_simples DIFERENTE . expressao_simples
 
-    $default  reduce using rule 36 (relacao)
+    ABRE_PARENTESES  shift, and go to state 44
+    IDENT            shift, and go to state 45
+    MAIS             shift, and go to state 46
+    MENOS            shift, and go to state 47
+    NOT              shift, and go to state 48
+    NUMERO           shift, and go to state 49
+
+    ABRE_PARENTESES  [reduce using rule 53 (chamada_funcao)]
+    IDENT            [reduce using rule 53 (chamada_funcao)]
+    MAIS             [reduce using rule 53 (chamada_funcao)]
+    MENOS            [reduce using rule 53 (chamada_funcao)]
+    NOT              [reduce using rule 53 (chamada_funcao)]
+    NUMERO           [reduce using rule 53 (chamada_funcao)]
+    $default         reduce using rule 53 (chamada_funcao)
+
+    expressao_simples  go to state 79
+    termo              go to state 53
+    fator              go to state 54
+    variavel           go to state 55
+    numero             go to state 56
+    chamada_funcao     go to state 57
 
 
 State 66
 
-   31 relacao: MENOR_IGUAL .
+   29 expressao: expressao_simples MENOR_IGUAL . expressao_simples
 
-    $default  reduce using rule 31 (relacao)
+    ABRE_PARENTESES  shift, and go to state 44
+    IDENT            shift, and go to state 45
+    MAIS             shift, and go to state 46
+    MENOS            shift, and go to state 47
+    NOT              shift, and go to state 48
+    NUMERO           shift, and go to state 49
+
+    ABRE_PARENTESES  [reduce using rule 53 (chamada_funcao)]
+    IDENT            [reduce using rule 53 (chamada_funcao)]
+    MAIS             [reduce using rule 53 (chamada_funcao)]
+    MENOS            [reduce using rule 53 (chamada_funcao)]
+    NOT              [reduce using rule 53 (chamada_funcao)]
+    NUMERO           [reduce using rule 53 (chamada_funcao)]
+    $default         reduce using rule 53 (chamada_funcao)
+
+    expressao_simples  go to state 80
+    termo              go to state 53
+    fator              go to state 54
+    variavel           go to state 55
+    numero             go to state 56
+    chamada_funcao     go to state 57
 
 
 State 67
 
-   32 relacao: MAIOR_IGUAL .
+   30 expressao: expressao_simples MAIOR_IGUAL . expressao_simples
 
-    $default  reduce using rule 32 (relacao)
+    ABRE_PARENTESES  shift, and go to state 44
+    IDENT            shift, and go to state 45
+    MAIS             shift, and go to state 46
+    MENOS            shift, and go to state 47
+    NOT              shift, and go to state 48
+    NUMERO           shift, and go to state 49
+
+    ABRE_PARENTESES  [reduce using rule 53 (chamada_funcao)]
+    IDENT            [reduce using rule 53 (chamada_funcao)]
+    MAIS             [reduce using rule 53 (chamada_funcao)]
+    MENOS            [reduce using rule 53 (chamada_funcao)]
+    NOT              [reduce using rule 53 (chamada_funcao)]
+    NUMERO           [reduce using rule 53 (chamada_funcao)]
+    $default         reduce using rule 53 (chamada_funcao)
+
+    expressao_simples  go to state 81
+    termo              go to state 53
+    fator              go to state 54
+    variavel           go to state 55
+    numero             go to state 56
+    chamada_funcao     go to state 57
 
 
 State 68
 
-   33 relacao: MENOR .
+   31 expressao: expressao_simples MENOR . expressao_simples
 
-    $default  reduce using rule 33 (relacao)
+    ABRE_PARENTESES  shift, and go to state 44
+    IDENT            shift, and go to state 45
+    MAIS             shift, and go to state 46
+    MENOS            shift, and go to state 47
+    NOT              shift, and go to state 48
+    NUMERO           shift, and go to state 49
+
+    ABRE_PARENTESES  [reduce using rule 53 (chamada_funcao)]
+    IDENT            [reduce using rule 53 (chamada_funcao)]
+    MAIS             [reduce using rule 53 (chamada_funcao)]
+    MENOS            [reduce using rule 53 (chamada_funcao)]
+    NOT              [reduce using rule 53 (chamada_funcao)]
+    NUMERO           [reduce using rule 53 (chamada_funcao)]
+    $default         reduce using rule 53 (chamada_funcao)
+
+    expressao_simples  go to state 82
+    termo              go to state 53
+    fator              go to state 54
+    variavel           go to state 55
+    numero             go to state 56
+    chamada_funcao     go to state 57
 
 
 State 69
 
-   34 relacao: MAIOR .
+   32 expressao: expressao_simples MAIOR . expressao_simples
 
-    $default  reduce using rule 34 (relacao)
+    ABRE_PARENTESES  shift, and go to state 44
+    IDENT            shift, and go to state 45
+    MAIS             shift, and go to state 46
+    MENOS            shift, and go to state 47
+    NOT              shift, and go to state 48
+    NUMERO           shift, and go to state 49
+
+    ABRE_PARENTESES  [reduce using rule 53 (chamada_funcao)]
+    IDENT            [reduce using rule 53 (chamada_funcao)]
+    MAIS             [reduce using rule 53 (chamada_funcao)]
+    MENOS            [reduce using rule 53 (chamada_funcao)]
+    NOT              [reduce using rule 53 (chamada_funcao)]
+    NUMERO           [reduce using rule 53 (chamada_funcao)]
+    $default         reduce using rule 53 (chamada_funcao)
+
+    expressao_simples  go to state 83
+    termo              go to state 53
+    fator              go to state 54
+    variavel           go to state 55
+    numero             go to state 56
+    chamada_funcao     go to state 57
 
 
 State 70
 
-   37 expressao_simples: expressao_simples MAIS . termo
+   36 expressao_simples: expressao_simples MAIS . termo
 
-    IDENT   shift, and go to state 44
-    MAIS    shift, and go to state 45
-    MENOS   shift, and go to state 46
-    NOT     shift, and go to state 47
-    NUMERO  shift, and go to state 48
+    ABRE_PARENTESES  shift, and go to state 44
+    IDENT            shift, and go to state 45
+    NOT              shift, and go to state 48
+    NUMERO           shift, and go to state 49
 
-    IDENT     [reduce using rule 57 (chamada_funcao)]
-    MAIS      [reduce using rule 57 (chamada_funcao)]
-    MENOS     [reduce using rule 57 (chamada_funcao)]
-    NOT       [reduce using rule 57 (chamada_funcao)]
-    NUMERO    [reduce using rule 57 (chamada_funcao)]
-    $default  reduce using rule 57 (chamada_funcao)
+    ABRE_PARENTESES  [reduce using rule 53 (chamada_funcao)]
+    IDENT            [reduce using rule 53 (chamada_funcao)]
+    NOT              [reduce using rule 53 (chamada_funcao)]
+    NUMERO           [reduce using rule 53 (chamada_funcao)]
+    $default         reduce using rule 53 (chamada_funcao)
 
-    expressao          go to state 61
-    expressao_simples  go to state 51
-    termo              go to state 80
-    fator              go to state 53
-    variavel           go to state 54
-    numero             go to state 55
-    chamada_funcao     go to state 56
+    termo           go to state 84
+    fator           go to state 54
+    variavel        go to state 55
+    numero          go to state 56
+    chamada_funcao  go to state 57
 
 
 State 71
 
-   38 expressao_simples: expressao_simples MENOS . termo
+   37 expressao_simples: expressao_simples MENOS . termo
 
-    IDENT   shift, and go to state 44
-    MAIS    shift, and go to state 45
-    MENOS   shift, and go to state 46
-    NOT     shift, and go to state 47
-    NUMERO  shift, and go to state 48
+    ABRE_PARENTESES  shift, and go to state 44
+    IDENT            shift, and go to state 45
+    NOT              shift, and go to state 48
+    NUMERO           shift, and go to state 49
 
-    IDENT     [reduce using rule 57 (chamada_funcao)]
-    MAIS      [reduce using rule 57 (chamada_funcao)]
-    MENOS     [reduce using rule 57 (chamada_funcao)]
-    NOT       [reduce using rule 57 (chamada_funcao)]
-    NUMERO    [reduce using rule 57 (chamada_funcao)]
-    $default  reduce using rule 57 (chamada_funcao)
+    ABRE_PARENTESES  [reduce using rule 53 (chamada_funcao)]
+    IDENT            [reduce using rule 53 (chamada_funcao)]
+    NOT              [reduce using rule 53 (chamada_funcao)]
+    NUMERO           [reduce using rule 53 (chamada_funcao)]
+    $default         reduce using rule 53 (chamada_funcao)
 
-    expressao          go to state 61
-    expressao_simples  go to state 51
-    termo              go to state 81
-    fator              go to state 53
-    variavel           go to state 54
-    numero             go to state 55
-    chamada_funcao     go to state 56
+    termo           go to state 85
+    fator           go to state 54
+    variavel        go to state 55
+    numero          go to state 56
+    chamada_funcao  go to state 57
 
 
 State 72
 
-   39 expressao_simples: expressao_simples OR . termo
+   38 expressao_simples: expressao_simples OR . termo
 
-    IDENT   shift, and go to state 44
-    MAIS    shift, and go to state 45
-    MENOS   shift, and go to state 46
-    NOT     shift, and go to state 47
-    NUMERO  shift, and go to state 48
+    ABRE_PARENTESES  shift, and go to state 44
+    IDENT            shift, and go to state 45
+    NOT              shift, and go to state 48
+    NUMERO           shift, and go to state 49
 
-    IDENT     [reduce using rule 57 (chamada_funcao)]
-    MAIS      [reduce using rule 57 (chamada_funcao)]
-    MENOS     [reduce using rule 57 (chamada_funcao)]
-    NOT       [reduce using rule 57 (chamada_funcao)]
-    NUMERO    [reduce using rule 57 (chamada_funcao)]
-    $default  reduce using rule 57 (chamada_funcao)
+    ABRE_PARENTESES  [reduce using rule 53 (chamada_funcao)]
+    IDENT            [reduce using rule 53 (chamada_funcao)]
+    NOT              [reduce using rule 53 (chamada_funcao)]
+    NUMERO           [reduce using rule 53 (chamada_funcao)]
+    $default         reduce using rule 53 (chamada_funcao)
 
-    expressao          go to state 61
-    expressao_simples  go to state 51
-    termo              go to state 82
-    fator              go to state 53
-    variavel           go to state 54
-    numero             go to state 55
-    chamada_funcao     go to state 56
+    termo           go to state 86
+    fator           go to state 54
+    variavel        go to state 55
+    numero          go to state 56
+    chamada_funcao  go to state 57
 
 
 State 73
 
-   29 expressao: expressao_simples relacao . expressao_simples
+   42 termo: termo MULTI . fator
 
-    IDENT   shift, and go to state 44
-    MAIS    shift, and go to state 45
-    MENOS   shift, and go to state 46
-    NOT     shift, and go to state 47
-    NUMERO  shift, and go to state 48
+    ABRE_PARENTESES  shift, and go to state 44
+    IDENT            shift, and go to state 45
+    NOT              shift, and go to state 48
+    NUMERO           shift, and go to state 49
 
-    IDENT     [reduce using rule 57 (chamada_funcao)]
-    MAIS      [reduce using rule 57 (chamada_funcao)]
-    MENOS     [reduce using rule 57 (chamada_funcao)]
-    NOT       [reduce using rule 57 (chamada_funcao)]
-    NUMERO    [reduce using rule 57 (chamada_funcao)]
-    $default  reduce using rule 57 (chamada_funcao)
+    ABRE_PARENTESES  [reduce using rule 53 (chamada_funcao)]
+    IDENT            [reduce using rule 53 (chamada_funcao)]
+    NOT              [reduce using rule 53 (chamada_funcao)]
+    NUMERO           [reduce using rule 53 (chamada_funcao)]
+    $default         reduce using rule 53 (chamada_funcao)
 
-    expressao          go to state 61
-    expressao_simples  go to state 83
-    termo              go to state 52
-    fator              go to state 53
-    variavel           go to state 54
-    numero             go to state 55
-    chamada_funcao     go to state 56
+    fator           go to state 87
+    variavel        go to state 55
+    numero          go to state 56
+    chamada_funcao  go to state 57
 
 
 State 74
 
-   45 termo: termo MULTI . fator
+   43 termo: termo DIV . fator
 
-    IDENT   shift, and go to state 44
-    MAIS    shift, and go to state 45
-    MENOS   shift, and go to state 46
-    NOT     shift, and go to state 47
-    NUMERO  shift, and go to state 48
+    ABRE_PARENTESES  shift, and go to state 44
+    IDENT            shift, and go to state 45
+    NOT              shift, and go to state 48
+    NUMERO           shift, and go to state 49
 
-    IDENT     [reduce using rule 57 (chamada_funcao)]
-    MAIS      [reduce using rule 57 (chamada_funcao)]
-    MENOS     [reduce using rule 57 (chamada_funcao)]
-    NOT       [reduce using rule 57 (chamada_funcao)]
-    NUMERO    [reduce using rule 57 (chamada_funcao)]
-    $default  reduce using rule 57 (chamada_funcao)
+    ABRE_PARENTESES  [reduce using rule 53 (chamada_funcao)]
+    IDENT            [reduce using rule 53 (chamada_funcao)]
+    NOT              [reduce using rule 53 (chamada_funcao)]
+    NUMERO           [reduce using rule 53 (chamada_funcao)]
+    $default         reduce using rule 53 (chamada_funcao)
 
-    expressao          go to state 61
-    expressao_simples  go to state 51
-    termo              go to state 52
-    fator              go to state 84
-    variavel           go to state 54
-    numero             go to state 55
-    chamada_funcao     go to state 56
+    fator           go to state 88
+    variavel        go to state 55
+    numero          go to state 56
+    chamada_funcao  go to state 57
 
 
 State 75
 
-   46 termo: termo DIV . fator
+   44 termo: termo AND . fator
 
-    IDENT   shift, and go to state 44
-    MAIS    shift, and go to state 45
-    MENOS   shift, and go to state 46
-    NOT     shift, and go to state 47
-    NUMERO  shift, and go to state 48
+    ABRE_PARENTESES  shift, and go to state 44
+    IDENT            shift, and go to state 45
+    NOT              shift, and go to state 48
+    NUMERO           shift, and go to state 49
 
-    IDENT     [reduce using rule 57 (chamada_funcao)]
-    MAIS      [reduce using rule 57 (chamada_funcao)]
-    MENOS     [reduce using rule 57 (chamada_funcao)]
-    NOT       [reduce using rule 57 (chamada_funcao)]
-    NUMERO    [reduce using rule 57 (chamada_funcao)]
-    $default  reduce using rule 57 (chamada_funcao)
+    ABRE_PARENTESES  [reduce using rule 53 (chamada_funcao)]
+    IDENT            [reduce using rule 53 (chamada_funcao)]
+    NOT              [reduce using rule 53 (chamada_funcao)]
+    NUMERO           [reduce using rule 53 (chamada_funcao)]
+    $default         reduce using rule 53 (chamada_funcao)
 
-    expressao          go to state 61
-    expressao_simples  go to state 51
-    termo              go to state 52
-    fator              go to state 85
-    variavel           go to state 54
-    numero             go to state 55
-    chamada_funcao     go to state 56
+    fator           go to state 89
+    variavel        go to state 55
+    numero          go to state 56
+    chamada_funcao  go to state 57
 
 
 State 76
-
-   47 termo: termo AND . fator
-
-    IDENT   shift, and go to state 44
-    MAIS    shift, and go to state 45
-    MENOS   shift, and go to state 46
-    NOT     shift, and go to state 47
-    NUMERO  shift, and go to state 48
-
-    IDENT     [reduce using rule 57 (chamada_funcao)]
-    MAIS      [reduce using rule 57 (chamada_funcao)]
-    MENOS     [reduce using rule 57 (chamada_funcao)]
-    NOT       [reduce using rule 57 (chamada_funcao)]
-    NUMERO    [reduce using rule 57 (chamada_funcao)]
-    $default  reduce using rule 57 (chamada_funcao)
-
-    expressao          go to state 61
-    expressao_simples  go to state 51
-    termo              go to state 52
-    fator              go to state 86
-    variavel           go to state 54
-    numero             go to state 55
-    chamada_funcao     go to state 56
-
-
-State 77
 
    13 declara_var: $@4 lista_id_var DOIS_PONTOS tipo $@5 PONTO_E_VIRGULA .
 
     $default  reduce using rule 13 (declara_var)
 
 
+State 77
+
+   50 fator: ABRE_PARENTESES expressao FECHA_PARENTESES .
+
+    $default  reduce using rule 50 (fator)
+
+
 State 78
 
-   41 expressao_simples: MAIS $@7 termo .
-   44                  | termo .
-   45 termo: termo . MULTI fator
-   46      | termo . DIV fator
-   47      | termo . AND fator
+   33 expressao: expressao_simples IGUAL expressao_simples .
+   36 expressao_simples: expressao_simples . MAIS termo
+   37                  | expressao_simples . MENOS termo
+   38                  | expressao_simples . OR termo
 
-    MULTI  shift, and go to state 74
-    DIV    shift, and go to state 75
-    AND    shift, and go to state 76
+    MAIS   shift, and go to state 70
+    MENOS  shift, and go to state 71
+    OR     shift, and go to state 72
 
-    PONTO_E_VIRGULA  reduce using rule 41 (expressao_simples)
-    PONTO_E_VIRGULA  [reduce using rule 44 (expressao_simples)]
-    IDENT            reduce using rule 41 (expressao_simples)
-    IDENT            [reduce using rule 44 (expressao_simples)]
-    IGUAL            reduce using rule 41 (expressao_simples)
-    IGUAL            [reduce using rule 44 (expressao_simples)]
-    DIFERENTE        reduce using rule 41 (expressao_simples)
-    DIFERENTE        [reduce using rule 44 (expressao_simples)]
-    MENOR_IGUAL      reduce using rule 41 (expressao_simples)
-    MENOR_IGUAL      [reduce using rule 44 (expressao_simples)]
-    MAIOR_IGUAL      reduce using rule 41 (expressao_simples)
-    MAIOR_IGUAL      [reduce using rule 44 (expressao_simples)]
-    MENOR            reduce using rule 41 (expressao_simples)
-    MENOR            [reduce using rule 44 (expressao_simples)]
-    MAIOR            reduce using rule 41 (expressao_simples)
-    MAIOR            [reduce using rule 44 (expressao_simples)]
-    MAIS             reduce using rule 41 (expressao_simples)
-    MAIS             [reduce using rule 44 (expressao_simples)]
-    MENOS            reduce using rule 41 (expressao_simples)
-    MENOS            [reduce using rule 44 (expressao_simples)]
-    OR               reduce using rule 41 (expressao_simples)
-    OR               [reduce using rule 44 (expressao_simples)]
-    MULTI            [reduce using rule 41 (expressao_simples)]
-    MULTI            [reduce using rule 44 (expressao_simples)]
-    DIV              [reduce using rule 41 (expressao_simples)]
-    DIV              [reduce using rule 44 (expressao_simples)]
-    AND              [reduce using rule 41 (expressao_simples)]
-    AND              [reduce using rule 44 (expressao_simples)]
-    NOT              reduce using rule 41 (expressao_simples)
-    NOT              [reduce using rule 44 (expressao_simples)]
-    NUMERO           reduce using rule 41 (expressao_simples)
-    NUMERO           [reduce using rule 44 (expressao_simples)]
-    $default         reduce using rule 41 (expressao_simples)
+    MAIS      [reduce using rule 33 (expressao)]
+    MENOS     [reduce using rule 33 (expressao)]
+    OR        [reduce using rule 33 (expressao)]
+    $default  reduce using rule 33 (expressao)
 
 
 State 79
 
-   43 expressao_simples: MENOS $@8 termo .
-   44                  | termo .
-   45 termo: termo . MULTI fator
-   46      | termo . DIV fator
-   47      | termo . AND fator
+   34 expressao: expressao_simples DIFERENTE expressao_simples .
+   36 expressao_simples: expressao_simples . MAIS termo
+   37                  | expressao_simples . MENOS termo
+   38                  | expressao_simples . OR termo
 
-    MULTI  shift, and go to state 74
-    DIV    shift, and go to state 75
-    AND    shift, and go to state 76
+    MAIS   shift, and go to state 70
+    MENOS  shift, and go to state 71
+    OR     shift, and go to state 72
 
-    PONTO_E_VIRGULA  reduce using rule 43 (expressao_simples)
-    PONTO_E_VIRGULA  [reduce using rule 44 (expressao_simples)]
-    IDENT            reduce using rule 43 (expressao_simples)
-    IDENT            [reduce using rule 44 (expressao_simples)]
-    IGUAL            reduce using rule 43 (expressao_simples)
-    IGUAL            [reduce using rule 44 (expressao_simples)]
-    DIFERENTE        reduce using rule 43 (expressao_simples)
-    DIFERENTE        [reduce using rule 44 (expressao_simples)]
-    MENOR_IGUAL      reduce using rule 43 (expressao_simples)
-    MENOR_IGUAL      [reduce using rule 44 (expressao_simples)]
-    MAIOR_IGUAL      reduce using rule 43 (expressao_simples)
-    MAIOR_IGUAL      [reduce using rule 44 (expressao_simples)]
-    MENOR            reduce using rule 43 (expressao_simples)
-    MENOR            [reduce using rule 44 (expressao_simples)]
-    MAIOR            reduce using rule 43 (expressao_simples)
-    MAIOR            [reduce using rule 44 (expressao_simples)]
-    MAIS             reduce using rule 43 (expressao_simples)
-    MAIS             [reduce using rule 44 (expressao_simples)]
-    MENOS            reduce using rule 43 (expressao_simples)
-    MENOS            [reduce using rule 44 (expressao_simples)]
-    OR               reduce using rule 43 (expressao_simples)
-    OR               [reduce using rule 44 (expressao_simples)]
-    MULTI            [reduce using rule 43 (expressao_simples)]
-    MULTI            [reduce using rule 44 (expressao_simples)]
-    DIV              [reduce using rule 43 (expressao_simples)]
-    DIV              [reduce using rule 44 (expressao_simples)]
-    AND              [reduce using rule 43 (expressao_simples)]
-    AND              [reduce using rule 44 (expressao_simples)]
-    NOT              reduce using rule 43 (expressao_simples)
-    NOT              [reduce using rule 44 (expressao_simples)]
-    NUMERO           reduce using rule 43 (expressao_simples)
-    NUMERO           [reduce using rule 44 (expressao_simples)]
-    $default         reduce using rule 43 (expressao_simples)
+    MAIS      [reduce using rule 34 (expressao)]
+    MENOS     [reduce using rule 34 (expressao)]
+    OR        [reduce using rule 34 (expressao)]
+    $default  reduce using rule 34 (expressao)
 
 
 State 80
 
-   37 expressao_simples: expressao_simples MAIS termo .
-   44                  | termo .
-   45 termo: termo . MULTI fator
-   46      | termo . DIV fator
-   47      | termo . AND fator
+   29 expressao: expressao_simples MENOR_IGUAL expressao_simples .
+   36 expressao_simples: expressao_simples . MAIS termo
+   37                  | expressao_simples . MENOS termo
+   38                  | expressao_simples . OR termo
 
-    MULTI  shift, and go to state 74
-    DIV    shift, and go to state 75
-    AND    shift, and go to state 76
+    MAIS   shift, and go to state 70
+    MENOS  shift, and go to state 71
+    OR     shift, and go to state 72
 
-    PONTO_E_VIRGULA  reduce using rule 37 (expressao_simples)
-    PONTO_E_VIRGULA  [reduce using rule 44 (expressao_simples)]
-    IDENT            reduce using rule 37 (expressao_simples)
-    IDENT            [reduce using rule 44 (expressao_simples)]
-    IGUAL            reduce using rule 37 (expressao_simples)
-    IGUAL            [reduce using rule 44 (expressao_simples)]
-    DIFERENTE        reduce using rule 37 (expressao_simples)
-    DIFERENTE        [reduce using rule 44 (expressao_simples)]
-    MENOR_IGUAL      reduce using rule 37 (expressao_simples)
-    MENOR_IGUAL      [reduce using rule 44 (expressao_simples)]
-    MAIOR_IGUAL      reduce using rule 37 (expressao_simples)
-    MAIOR_IGUAL      [reduce using rule 44 (expressao_simples)]
-    MENOR            reduce using rule 37 (expressao_simples)
-    MENOR            [reduce using rule 44 (expressao_simples)]
-    MAIOR            reduce using rule 37 (expressao_simples)
-    MAIOR            [reduce using rule 44 (expressao_simples)]
-    MAIS             reduce using rule 37 (expressao_simples)
-    MAIS             [reduce using rule 44 (expressao_simples)]
-    MENOS            reduce using rule 37 (expressao_simples)
-    MENOS            [reduce using rule 44 (expressao_simples)]
-    OR               reduce using rule 37 (expressao_simples)
-    OR               [reduce using rule 44 (expressao_simples)]
-    MULTI            [reduce using rule 37 (expressao_simples)]
-    MULTI            [reduce using rule 44 (expressao_simples)]
-    DIV              [reduce using rule 37 (expressao_simples)]
-    DIV              [reduce using rule 44 (expressao_simples)]
-    AND              [reduce using rule 37 (expressao_simples)]
-    AND              [reduce using rule 44 (expressao_simples)]
-    NOT              reduce using rule 37 (expressao_simples)
-    NOT              [reduce using rule 44 (expressao_simples)]
-    NUMERO           reduce using rule 37 (expressao_simples)
-    NUMERO           [reduce using rule 44 (expressao_simples)]
-    $default         reduce using rule 37 (expressao_simples)
+    MAIS      [reduce using rule 29 (expressao)]
+    MENOS     [reduce using rule 29 (expressao)]
+    OR        [reduce using rule 29 (expressao)]
+    $default  reduce using rule 29 (expressao)
 
 
 State 81
 
-   38 expressao_simples: expressao_simples MENOS termo .
-   44                  | termo .
-   45 termo: termo . MULTI fator
-   46      | termo . DIV fator
-   47      | termo . AND fator
+   30 expressao: expressao_simples MAIOR_IGUAL expressao_simples .
+   36 expressao_simples: expressao_simples . MAIS termo
+   37                  | expressao_simples . MENOS termo
+   38                  | expressao_simples . OR termo
 
-    MULTI  shift, and go to state 74
-    DIV    shift, and go to state 75
-    AND    shift, and go to state 76
+    MAIS   shift, and go to state 70
+    MENOS  shift, and go to state 71
+    OR     shift, and go to state 72
 
-    PONTO_E_VIRGULA  reduce using rule 38 (expressao_simples)
-    PONTO_E_VIRGULA  [reduce using rule 44 (expressao_simples)]
-    IDENT            reduce using rule 38 (expressao_simples)
-    IDENT            [reduce using rule 44 (expressao_simples)]
-    IGUAL            reduce using rule 38 (expressao_simples)
-    IGUAL            [reduce using rule 44 (expressao_simples)]
-    DIFERENTE        reduce using rule 38 (expressao_simples)
-    DIFERENTE        [reduce using rule 44 (expressao_simples)]
-    MENOR_IGUAL      reduce using rule 38 (expressao_simples)
-    MENOR_IGUAL      [reduce using rule 44 (expressao_simples)]
-    MAIOR_IGUAL      reduce using rule 38 (expressao_simples)
-    MAIOR_IGUAL      [reduce using rule 44 (expressao_simples)]
-    MENOR            reduce using rule 38 (expressao_simples)
-    MENOR            [reduce using rule 44 (expressao_simples)]
-    MAIOR            reduce using rule 38 (expressao_simples)
-    MAIOR            [reduce using rule 44 (expressao_simples)]
-    MAIS             reduce using rule 38 (expressao_simples)
-    MAIS             [reduce using rule 44 (expressao_simples)]
-    MENOS            reduce using rule 38 (expressao_simples)
-    MENOS            [reduce using rule 44 (expressao_simples)]
-    OR               reduce using rule 38 (expressao_simples)
-    OR               [reduce using rule 44 (expressao_simples)]
-    MULTI            [reduce using rule 38 (expressao_simples)]
-    MULTI            [reduce using rule 44 (expressao_simples)]
-    DIV              [reduce using rule 38 (expressao_simples)]
-    DIV              [reduce using rule 44 (expressao_simples)]
-    AND              [reduce using rule 38 (expressao_simples)]
-    AND              [reduce using rule 44 (expressao_simples)]
-    NOT              reduce using rule 38 (expressao_simples)
-    NOT              [reduce using rule 44 (expressao_simples)]
-    NUMERO           reduce using rule 38 (expressao_simples)
-    NUMERO           [reduce using rule 44 (expressao_simples)]
-    $default         reduce using rule 38 (expressao_simples)
+    MAIS      [reduce using rule 30 (expressao)]
+    MENOS     [reduce using rule 30 (expressao)]
+    OR        [reduce using rule 30 (expressao)]
+    $default  reduce using rule 30 (expressao)
 
 
 State 82
 
-   39 expressao_simples: expressao_simples OR termo .
-   44                  | termo .
-   45 termo: termo . MULTI fator
-   46      | termo . DIV fator
-   47      | termo . AND fator
+   31 expressao: expressao_simples MENOR expressao_simples .
+   36 expressao_simples: expressao_simples . MAIS termo
+   37                  | expressao_simples . MENOS termo
+   38                  | expressao_simples . OR termo
 
-    MULTI  shift, and go to state 74
-    DIV    shift, and go to state 75
-    AND    shift, and go to state 76
+    MAIS   shift, and go to state 70
+    MENOS  shift, and go to state 71
+    OR     shift, and go to state 72
 
-    PONTO_E_VIRGULA  reduce using rule 39 (expressao_simples)
-    PONTO_E_VIRGULA  [reduce using rule 44 (expressao_simples)]
-    IDENT            reduce using rule 39 (expressao_simples)
-    IDENT            [reduce using rule 44 (expressao_simples)]
-    IGUAL            reduce using rule 39 (expressao_simples)
-    IGUAL            [reduce using rule 44 (expressao_simples)]
-    DIFERENTE        reduce using rule 39 (expressao_simples)
-    DIFERENTE        [reduce using rule 44 (expressao_simples)]
-    MENOR_IGUAL      reduce using rule 39 (expressao_simples)
-    MENOR_IGUAL      [reduce using rule 44 (expressao_simples)]
-    MAIOR_IGUAL      reduce using rule 39 (expressao_simples)
-    MAIOR_IGUAL      [reduce using rule 44 (expressao_simples)]
-    MENOR            reduce using rule 39 (expressao_simples)
-    MENOR            [reduce using rule 44 (expressao_simples)]
-    MAIOR            reduce using rule 39 (expressao_simples)
-    MAIOR            [reduce using rule 44 (expressao_simples)]
-    MAIS             reduce using rule 39 (expressao_simples)
-    MAIS             [reduce using rule 44 (expressao_simples)]
-    MENOS            reduce using rule 39 (expressao_simples)
-    MENOS            [reduce using rule 44 (expressao_simples)]
-    OR               reduce using rule 39 (expressao_simples)
-    OR               [reduce using rule 44 (expressao_simples)]
-    MULTI            [reduce using rule 39 (expressao_simples)]
-    MULTI            [reduce using rule 44 (expressao_simples)]
-    DIV              [reduce using rule 39 (expressao_simples)]
-    DIV              [reduce using rule 44 (expressao_simples)]
-    AND              [reduce using rule 39 (expressao_simples)]
-    AND              [reduce using rule 44 (expressao_simples)]
-    NOT              reduce using rule 39 (expressao_simples)
-    NOT              [reduce using rule 44 (expressao_simples)]
-    NUMERO           reduce using rule 39 (expressao_simples)
-    NUMERO           [reduce using rule 44 (expressao_simples)]
-    $default         reduce using rule 39 (expressao_simples)
+    MAIS      [reduce using rule 31 (expressao)]
+    MENOS     [reduce using rule 31 (expressao)]
+    OR        [reduce using rule 31 (expressao)]
+    $default  reduce using rule 31 (expressao)
 
 
 State 83
 
-   29 expressao: expressao_simples . relacao expressao_simples
-   29          | expressao_simples relacao expressao_simples .
-   30          | expressao_simples .
-   37 expressao_simples: expressao_simples . MAIS termo
-   38                  | expressao_simples . MENOS termo
-   39                  | expressao_simples . OR termo
+   32 expressao: expressao_simples MAIOR expressao_simples .
+   36 expressao_simples: expressao_simples . MAIS termo
+   37                  | expressao_simples . MENOS termo
+   38                  | expressao_simples . OR termo
 
-    IGUAL        shift, and go to state 64
-    DIFERENTE    shift, and go to state 65
-    MENOR_IGUAL  shift, and go to state 66
-    MAIOR_IGUAL  shift, and go to state 67
-    MENOR        shift, and go to state 68
-    MAIOR        shift, and go to state 69
-    MAIS         shift, and go to state 70
-    MENOS        shift, and go to state 71
-    OR           shift, and go to state 72
+    MAIS   shift, and go to state 70
+    MENOS  shift, and go to state 71
+    OR     shift, and go to state 72
 
-    PONTO_E_VIRGULA  reduce using rule 29 (expressao)
-    PONTO_E_VIRGULA  [reduce using rule 30 (expressao)]
-    IDENT            reduce using rule 29 (expressao)
-    IDENT            [reduce using rule 30 (expressao)]
-    IGUAL            [reduce using rule 29 (expressao)]
-    IGUAL            [reduce using rule 30 (expressao)]
-    DIFERENTE        [reduce using rule 29 (expressao)]
-    DIFERENTE        [reduce using rule 30 (expressao)]
-    MENOR_IGUAL      [reduce using rule 29 (expressao)]
-    MENOR_IGUAL      [reduce using rule 30 (expressao)]
-    MAIOR_IGUAL      [reduce using rule 29 (expressao)]
-    MAIOR_IGUAL      [reduce using rule 30 (expressao)]
-    MENOR            [reduce using rule 29 (expressao)]
-    MENOR            [reduce using rule 30 (expressao)]
-    MAIOR            [reduce using rule 29 (expressao)]
-    MAIOR            [reduce using rule 30 (expressao)]
-    MAIS             [reduce using rule 29 (expressao)]
-    MAIS             [reduce using rule 30 (expressao)]
-    MENOS            [reduce using rule 29 (expressao)]
-    MENOS            [reduce using rule 30 (expressao)]
-    OR               [reduce using rule 29 (expressao)]
-    OR               [reduce using rule 30 (expressao)]
-    MULTI            reduce using rule 29 (expressao)
-    MULTI            [reduce using rule 30 (expressao)]
-    DIV              reduce using rule 29 (expressao)
-    DIV              [reduce using rule 30 (expressao)]
-    AND              reduce using rule 29 (expressao)
-    AND              [reduce using rule 30 (expressao)]
-    NOT              reduce using rule 29 (expressao)
-    NOT              [reduce using rule 30 (expressao)]
-    NUMERO           reduce using rule 29 (expressao)
-    NUMERO           [reduce using rule 30 (expressao)]
-    $default         reduce using rule 29 (expressao)
-
-    relacao  go to state 73
+    MAIS      [reduce using rule 32 (expressao)]
+    MENOS     [reduce using rule 32 (expressao)]
+    OR        [reduce using rule 32 (expressao)]
+    $default  reduce using rule 32 (expressao)
 
 
 State 84
 
-   45 termo: termo MULTI fator .
-   48      | fator .
+   36 expressao_simples: expressao_simples MAIS termo .
+   42 termo: termo . MULTI fator
+   43      | termo . DIV fator
+   44      | termo . AND fator
 
-    PONTO_E_VIRGULA  reduce using rule 45 (termo)
-    PONTO_E_VIRGULA  [reduce using rule 48 (termo)]
-    IDENT            reduce using rule 45 (termo)
-    IDENT            [reduce using rule 48 (termo)]
-    IGUAL            reduce using rule 45 (termo)
-    IGUAL            [reduce using rule 48 (termo)]
-    DIFERENTE        reduce using rule 45 (termo)
-    DIFERENTE        [reduce using rule 48 (termo)]
-    MENOR_IGUAL      reduce using rule 45 (termo)
-    MENOR_IGUAL      [reduce using rule 48 (termo)]
-    MAIOR_IGUAL      reduce using rule 45 (termo)
-    MAIOR_IGUAL      [reduce using rule 48 (termo)]
-    MENOR            reduce using rule 45 (termo)
-    MENOR            [reduce using rule 48 (termo)]
-    MAIOR            reduce using rule 45 (termo)
-    MAIOR            [reduce using rule 48 (termo)]
-    MAIS             reduce using rule 45 (termo)
-    MAIS             [reduce using rule 48 (termo)]
-    MENOS            reduce using rule 45 (termo)
-    MENOS            [reduce using rule 48 (termo)]
-    OR               reduce using rule 45 (termo)
-    OR               [reduce using rule 48 (termo)]
-    MULTI            reduce using rule 45 (termo)
-    MULTI            [reduce using rule 48 (termo)]
-    DIV              reduce using rule 45 (termo)
-    DIV              [reduce using rule 48 (termo)]
-    AND              reduce using rule 45 (termo)
-    AND              [reduce using rule 48 (termo)]
-    NOT              reduce using rule 45 (termo)
-    NOT              [reduce using rule 48 (termo)]
-    NUMERO           reduce using rule 45 (termo)
-    NUMERO           [reduce using rule 48 (termo)]
-    $default         reduce using rule 45 (termo)
+    MULTI  shift, and go to state 73
+    DIV    shift, and go to state 74
+    AND    shift, and go to state 75
+
+    MULTI     [reduce using rule 36 (expressao_simples)]
+    DIV       [reduce using rule 36 (expressao_simples)]
+    AND       [reduce using rule 36 (expressao_simples)]
+    $default  reduce using rule 36 (expressao_simples)
 
 
 State 85
 
-   46 termo: termo DIV fator .
-   48      | fator .
+   37 expressao_simples: expressao_simples MENOS termo .
+   42 termo: termo . MULTI fator
+   43      | termo . DIV fator
+   44      | termo . AND fator
 
-    PONTO_E_VIRGULA  reduce using rule 46 (termo)
-    PONTO_E_VIRGULA  [reduce using rule 48 (termo)]
-    IDENT            reduce using rule 46 (termo)
-    IDENT            [reduce using rule 48 (termo)]
-    IGUAL            reduce using rule 46 (termo)
-    IGUAL            [reduce using rule 48 (termo)]
-    DIFERENTE        reduce using rule 46 (termo)
-    DIFERENTE        [reduce using rule 48 (termo)]
-    MENOR_IGUAL      reduce using rule 46 (termo)
-    MENOR_IGUAL      [reduce using rule 48 (termo)]
-    MAIOR_IGUAL      reduce using rule 46 (termo)
-    MAIOR_IGUAL      [reduce using rule 48 (termo)]
-    MENOR            reduce using rule 46 (termo)
-    MENOR            [reduce using rule 48 (termo)]
-    MAIOR            reduce using rule 46 (termo)
-    MAIOR            [reduce using rule 48 (termo)]
-    MAIS             reduce using rule 46 (termo)
-    MAIS             [reduce using rule 48 (termo)]
-    MENOS            reduce using rule 46 (termo)
-    MENOS            [reduce using rule 48 (termo)]
-    OR               reduce using rule 46 (termo)
-    OR               [reduce using rule 48 (termo)]
-    MULTI            reduce using rule 46 (termo)
-    MULTI            [reduce using rule 48 (termo)]
-    DIV              reduce using rule 46 (termo)
-    DIV              [reduce using rule 48 (termo)]
-    AND              reduce using rule 46 (termo)
-    AND              [reduce using rule 48 (termo)]
-    NOT              reduce using rule 46 (termo)
-    NOT              [reduce using rule 48 (termo)]
-    NUMERO           reduce using rule 46 (termo)
-    NUMERO           [reduce using rule 48 (termo)]
-    $default         reduce using rule 46 (termo)
+    MULTI  shift, and go to state 73
+    DIV    shift, and go to state 74
+    AND    shift, and go to state 75
+
+    MULTI     [reduce using rule 37 (expressao_simples)]
+    DIV       [reduce using rule 37 (expressao_simples)]
+    AND       [reduce using rule 37 (expressao_simples)]
+    $default  reduce using rule 37 (expressao_simples)
 
 
 State 86
 
-   47 termo: termo AND fator .
-   48      | fator .
+   38 expressao_simples: expressao_simples OR termo .
+   42 termo: termo . MULTI fator
+   43      | termo . DIV fator
+   44      | termo . AND fator
 
-    PONTO_E_VIRGULA  reduce using rule 47 (termo)
-    PONTO_E_VIRGULA  [reduce using rule 48 (termo)]
-    IDENT            reduce using rule 47 (termo)
-    IDENT            [reduce using rule 48 (termo)]
-    IGUAL            reduce using rule 47 (termo)
-    IGUAL            [reduce using rule 48 (termo)]
-    DIFERENTE        reduce using rule 47 (termo)
-    DIFERENTE        [reduce using rule 48 (termo)]
-    MENOR_IGUAL      reduce using rule 47 (termo)
-    MENOR_IGUAL      [reduce using rule 48 (termo)]
-    MAIOR_IGUAL      reduce using rule 47 (termo)
-    MAIOR_IGUAL      [reduce using rule 48 (termo)]
-    MENOR            reduce using rule 47 (termo)
-    MENOR            [reduce using rule 48 (termo)]
-    MAIOR            reduce using rule 47 (termo)
-    MAIOR            [reduce using rule 48 (termo)]
-    MAIS             reduce using rule 47 (termo)
-    MAIS             [reduce using rule 48 (termo)]
-    MENOS            reduce using rule 47 (termo)
-    MENOS            [reduce using rule 48 (termo)]
-    OR               reduce using rule 47 (termo)
-    OR               [reduce using rule 48 (termo)]
-    MULTI            reduce using rule 47 (termo)
-    MULTI            [reduce using rule 48 (termo)]
-    DIV              reduce using rule 47 (termo)
-    DIV              [reduce using rule 48 (termo)]
-    AND              reduce using rule 47 (termo)
-    AND              [reduce using rule 48 (termo)]
-    NOT              reduce using rule 47 (termo)
-    NOT              [reduce using rule 48 (termo)]
-    NUMERO           reduce using rule 47 (termo)
-    NUMERO           [reduce using rule 48 (termo)]
-    $default         reduce using rule 47 (termo)
+    MULTI  shift, and go to state 73
+    DIV    shift, and go to state 74
+    AND    shift, and go to state 75
+
+    MULTI     [reduce using rule 38 (expressao_simples)]
+    DIV       [reduce using rule 38 (expressao_simples)]
+    AND       [reduce using rule 38 (expressao_simples)]
+    $default  reduce using rule 38 (expressao_simples)
+
+
+State 87
+
+   42 termo: termo MULTI fator .
+
+    $default  reduce using rule 42 (termo)
+
+
+State 88
+
+   43 termo: termo DIV fator .
+
+    $default  reduce using rule 43 (termo)
+
+
+State 89
+
+   44 termo: termo AND fator .
+
+    $default  reduce using rule 44 (termo)

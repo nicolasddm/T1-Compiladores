@@ -1,9 +1,6 @@
      INPP
-     AMEM 3
-     CRCT 7
-     CRCT 3
-     SUBT
-     CRCT 3
-     CMME
-     DMEM 3
+     AMEM 4
+     CRCT 1
+     ARMZ 0, 1
+     DMEM 4
      PARA
