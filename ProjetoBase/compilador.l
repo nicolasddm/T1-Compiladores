@@ -113,12 +113,6 @@ end { simbolo = simb_end;
           return FECHA_PARENTESES;
  }
 
-{ident} { simbolo = simb_identificador;
-          strncpy (token, yytext, TAM_TOKEN);
-          IMPRIME(" ident  ");
-          return IDENT;
-        }
-
 label {
 	simbolo = simb_label;
     strncpy (token, yytext, TAM_TOKEN);
@@ -313,6 +307,12 @@ write {
     strncpy (token, yytext, TAM_TOKEN);
     IMPRIME(" numero  ");
     return NUMERO;
+}
+
+{ident} { simbolo = simb_identificador;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" ident  ");
+          return IDENT;
 }
 
 %%

@@ -9,33 +9,40 @@
 #include "tabelaSimbolos.c"
 #include "pilha.c"
 #define TAM_COMANDO 64
+#define TAM_ROTULO 16
 
+
+char comando[TAM_COMANDO];
+char rotulo[TAM_ROTULO];
 
 int num_vars;
 int tamAmem;
-char comando[TAM_COMANDO];
 int nivelLexico = 0;
 int deslocamento = 0;
 int numTipo;
 int tipo;
 int elemTipo;
 int elemAtribuicaoTipo;
+int rotulosTam = -1;
+int rotuloDesviaTrue;
+int rotuloDesviaFalse;
 
 TabelaSimbolos *tabelaSimbolos;
 Simbolo elemento;
 Simbolo simboloElem;
 Simbolo elemAtribuicao;
 Pilha *pilhaExpressao;
+Pilha *pilhaRotulos;
 
 %}
 
 %token PROGRAM ABRE_PARENTESES FECHA_PARENTESES
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
-%token T_BEGIN T_END VAR IDENT ATRIBUICAO
+%token T_BEGIN T_END VAR ATRIBUICAO
 %token WRITE READ LABEL TYPE ARRAY OF PROCEDURE
 %token FUNCTION GOTO IF THEN ELSE WHILE DO IGUAL
 %token DIFERENTE MENOR_IGUAL MAIOR_IGUAL MENOR
-%token MAIOR MAIS MENOS OR MULTI DIV AND NOT NUMERO
+%token MAIOR MAIS MENOS OR MULTI DIV AND NOT NUMERO IDENT
 
 
 %%
@@ -148,7 +155,83 @@ comando: variavel_atribuicao
     }
     atribuicao
     | PONTO_E_VIRGULA
+    | comando_repetitivo
+    | read
+    | write
 ; 
+
+read: READ ABRE_PARENTESES le_idents FECHA_PARENTESES;
+
+le_idents: 
+    le_idents VIRGULA variavel
+    {
+        if (strcmp(elemento.atributos->categoria, "vs") == 0) {
+            geraCodigo (NULL, "LEIT");
+            sprintf(comando, "ARMZ %d, %d", elemento.atributos->nivelLexico, elemento.atributos->deslocamento);
+            geraCodigo (NULL, comando);
+        } else {
+            printf("Esta variável não é uma variável simples para realizar leitura!");
+            exit(-1);
+        }
+    }
+    | variavel
+    {
+        if (strcmp(elemento.atributos->categoria, "vs") == 0) {
+            geraCodigo (NULL, "LEIT");
+            sprintf(comando, "ARMZ %d, %d", elemento.atributos->nivelLexico, elemento.atributos->deslocamento);
+            geraCodigo (NULL, comando);
+        } else {
+            printf("Esta variável não é uma variável simples para realizar leitura!");
+            exit(-1);
+        }
+    }
+;
+
+write: WRITE ABRE_PARENTESES escreve_expressoes FECHA_PARENTESES;
+
+escreve_expressoes: 
+    escreve_expressoes VIRGULA expressao
+    {
+        geraCodigo (NULL, "IMPR");
+        retiraElemPilha(pilhaExpressao);
+    }
+    | expressao
+    {
+        geraCodigo (NULL, "IMPR");
+        retiraElemPilha(pilhaExpressao);
+    }
+;
+
+
+
+comando_repetitivo: 
+    WHILE 
+    {
+        rotulosTam++;
+        insereElemPilha(pilhaRotulos, rotulosTam);
+        sprintf(rotulo, "R%02d:NADA", rotulosTam);
+        geraCodigo(NULL, rotulo);
+    }
+    expressao 
+    {
+        if (retiraElemPilha(pilhaExpressao) != 1) {
+            printf("Tipo da expressão condicional deve ser booleano\n");
+        }
+        rotulosTam++;
+        insereElemPilha(pilhaRotulos, rotulosTam);
+        sprintf(rotulo, "DSVF R%02d", rotulosTam);
+        geraCodigo(NULL, rotulo);
+    } 
+    DO comando_composto
+    {
+        rotuloDesviaFalse = retiraElemPilha(pilhaRotulos);
+        rotuloDesviaTrue = retiraElemPilha(pilhaRotulos);
+        sprintf(comando, "DSVS R%02d", rotuloDesviaTrue);
+        geraCodigo(NULL, comando);
+        sprintf(comando, "R%02d:NADA", rotuloDesviaFalse);
+        geraCodigo(NULL, comando);
+    }
+;
 
 variavel_atribuicao: 
     IDENT {
@@ -210,7 +293,14 @@ termo:
 
 
 fator: 
-    variavel { insereElemPilha(pilhaExpressao, elemTipo); imprimePilha(pilhaExpressao); }
+    variavel 
+    { 
+        insereElemPilha(pilhaExpressao, elemTipo); 
+        if (strcmp(elemento.atributos->categoria, "vs") == 0) {
+            sprintf(comando, "CRVL %d, %d", elemento.atributos->nivelLexico, elemento.atributos->deslocamento);
+        }
+        geraCodigo (NULL, comando);
+    }
     | NOT fator
     | numero { insereElemPilha(pilhaExpressao, 0); imprimePilha(pilhaExpressao); }
     | chamada_funcao { }
@@ -220,7 +310,7 @@ fator:
 
 variavel: 
         IDENT {
-            Simbolo elemento = buscaSimbolo(tabelaSimbolos, token);
+            elemento = buscaSimbolo(tabelaSimbolos, token);
             imprimeSimbolo(elemento);
             elemTipo = elemento.atributos->tipo;
         }
@@ -255,6 +345,7 @@ int main (int argc, char** argv) {
  * ------------------------------------------------------------------- */
     tabelaSimbolos = initTabela();
     pilhaExpressao = initPilha();
+    pilhaRotulos = initPilha();
 
     yyin=fp;
     yyparse();
