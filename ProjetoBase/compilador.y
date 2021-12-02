@@ -1,5 +1,3 @@
-
-
 %{
 #include <stdio.h>
 #include <ctype.h>
@@ -14,6 +12,7 @@
 
 char comando[TAM_COMANDO];
 char rotulo[TAM_ROTULO];
+char ident_proc_funcao[TAM_COMANDO];
 
 int num_vars;
 int tamAmem;
@@ -26,6 +25,7 @@ int elemAtribuicaoTipo;
 int rotulosTam = -1;
 int rotuloDesviaTrue;
 int rotuloDesviaFalse;
+int numParams = 0;
 
 TabelaSimbolos *tabelaSimbolos;
 Simbolo elemento;
@@ -33,6 +33,7 @@ Simbolo simboloElem;
 Simbolo elemAtribuicao;
 Pilha *pilhaExpressao;
 Pilha *pilhaRotulos;
+Pilha *pilhaDmem;
 
 %}
 
@@ -44,7 +45,8 @@ Pilha *pilhaRotulos;
 %token DIFERENTE MENOR_IGUAL MAIOR_IGUAL MENOR
 %token MAIOR MAIS MENOS OR MULTI DIV AND NOT NUMERO IDENT
 
-
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
 %%
 
 programa    :{
@@ -58,30 +60,86 @@ programa    :{
              }
 ;
 
-bloco       :
-              parte_declara_vars
-              {
-              }
-
-              comando_composto {
-                  imprimeTabela(tabelaSimbolos);
-                  retiraSimbolos(tabelaSimbolos, tamAmem);
-                  sprintf(comando, "DMEM %d", tamAmem);
-                  geraCodigo (NULL, comando);
-              }
-              ;
-
-
-
-
-parte_declara_vars:  var
+bloco:
+    parte_declara_vars
+    
+    parte_declara_algo_ou_nada
+    
+    comando_composto {
+        imprimeTabela(tabelaSimbolos);
+        int tamDmem = retiraElemPilha(pilhaDmem);
+        retiraSimbolos(tabelaSimbolos, tamDmem);
+        sprintf(comando, "DMEM %d", tamDmem);
+        geraCodigo (NULL, comando);
+    }
 ;
 
+parte_declara_algo_ou_nada:  
+    {
+        rotulosTam++;
+        insereElemPilha(pilhaRotulos, rotulosTam);
+        sprintf(comando, "DSVS R%02d", rotulosTam);
+        geraCodigo(NULL, comando);
+    }  parte_declara_funcoes_ou_procedimentos
+    {
+        if (pilhaRotulos->topo >= 0) {
+            rotuloDesviaTrue = retiraElemPilha(pilhaRotulos);
+            sprintf(comando, "R%02d:NADA", rotuloDesviaTrue);
+            geraCodigo(NULL, comando);
+        }
+    }
+    |
+;
+
+parte_declara_funcoes_ou_procedimentos: 
+    declara_procedimento PONTO_E_VIRGULA
+    // | declara_funcao PONTO_E_VIRGULA
+;
+
+declara_procedimento: 
+    PROCEDURE {
+        deslocamento = 0;
+        nivelLexico++;
+        rotulosTam++;
+        sprintf(comando, "R%02d:ENPR %d", rotulosTam, nivelLexico);
+        geraCodigo(NULL, comando);
+        
+    }
+    IDENT { 
+        strcpy(ident_proc_funcao, token);
+        Atributos *atributos = (Atributos*) malloc(sizeof(Atributos));
+        strcpy(atributos->categoria, "proc");
+        atributos->nivelLexico = nivelLexico;
+        atributos->rotulo = rotulosTam;
+        insereSimbolo(tabelaSimbolos, ident_proc_funcao, atributos);
+
+    } 
+    tem_parametro_ou_nada PONTO_E_VIRGULA
+    {
+
+    }
+    bloco
+    {
+        retiraSimbolos(tabelaSimbolos, numParams);
+        rotuloDesviaFalse = retiraElemPilha(pilhaRotulos);
+        rotuloDesviaTrue =  retiraElemPilha(pilhaRotulos);
+        sprintf(comando, "RTPR %d, %d", nivelLexico, numParams);
+        geraCodigo(NULL, comando);
+        nivelLexico--;
+    }
+;    
+
+tem_parametro_ou_nada: 
+    // | ABRE_PARENTESES parametros FECHA_PARENTESES
+;
+
+parte_declara_vars:  var;
 
 var         : { tamAmem = 0; } VAR declara_vars
             { /* AMEM */
                   sprintf(comando, "AMEM %d", tamAmem);
                   geraCodigo (NULL, comando);
+                  insereElemPilha(pilhaDmem, tamAmem);
             }
             |
 ;
@@ -136,29 +194,71 @@ lista_id_var: lista_id_var VIRGULA IDENT
             }
 ;
 
-lista_idents: lista_idents VIRGULA IDENT
-            | IDENT
+lista_idents: 
+    lista_idents VIRGULA IDENT
+    | IDENT
 ;
 
 
-comando_composto: T_BEGIN comandos PONTO_E_VIRGULA T_END
+comando_composto: T_BEGIN comandos ponto_e_virgula_ou_vazio T_END
 
 comandos: comandos PONTO_E_VIRGULA comando
-    | comando 
-    
+    | comando
 ;
+
+ponto_e_virgula_ou_vazio: 
+    PONTO_E_VIRGULA
+    | 
 
 comando: variavel_atribuicao 
     {
         elemAtribuicao = simboloElem;
         elemAtribuicaoTipo = elemTipo;
     }
-    atribuicao
-    | PONTO_E_VIRGULA
+    atribuicao_ou_procedimento
+    | comando_composto
     | comando_repetitivo
+    | comando_condicional
     | read
     | write
 ; 
+
+comando_condicional: 
+    parte_if_then parte_else
+    | parte_if_then %prec LOWER_THAN_ELSE
+;
+
+parte_if_then: 
+    IF expressao 
+    {
+        if (retiraElemPilha(pilhaExpressao) != 1) {
+            printf("A expressão da condicional deve sempre retornar booleano!");
+        }
+        rotulosTam++;
+        insereElemPilha(pilhaRotulos, rotulosTam);
+        sprintf(comando, "DSVF R%02d", rotulosTam);
+        geraCodigo(NULL, comando);
+    }
+    THEN {
+        rotulosTam++;
+        insereElemPilha(pilhaRotulos, rotulosTam);
+    } comando {
+        rotuloDesviaTrue = retiraElemPilha(pilhaRotulos);
+        rotuloDesviaFalse =  retiraElemPilha(pilhaRotulos);
+        sprintf(comando, "DSVS R%02d", rotuloDesviaTrue);
+        geraCodigo(NULL, comando);
+        sprintf(comando, "R%02d:NADA", rotuloDesviaFalse);
+        geraCodigo(NULL, comando);
+        insereElemPilha(pilhaRotulos, rotuloDesviaTrue);
+    }
+;
+
+parte_else:
+    ELSE comando {
+        rotuloDesviaTrue = retiraElemPilha(pilhaRotulos);
+        sprintf(comando, "R%02d:NADA", rotuloDesviaTrue);
+        geraCodigo(NULL, comando);
+    }
 
 read: READ ABRE_PARENTESES le_idents FECHA_PARENTESES;
 
@@ -222,7 +322,7 @@ comando_repetitivo:
         sprintf(rotulo, "DSVF R%02d", rotulosTam);
         geraCodigo(NULL, rotulo);
     } 
-    DO comando_composto
+    DO comando
     {
         rotuloDesviaFalse = retiraElemPilha(pilhaRotulos);
         rotuloDesviaTrue = retiraElemPilha(pilhaRotulos);
@@ -230,7 +330,7 @@ comando_repetitivo:
         geraCodigo(NULL, comando);
         sprintf(comando, "R%02d:NADA", rotuloDesviaFalse);
         geraCodigo(NULL, comando);
-    }
+    } 
 ;
 
 variavel_atribuicao: 
@@ -240,6 +340,28 @@ variavel_atribuicao:
         imprimeSimbolo(simboloElem);
     }
 ;
+
+atribuicao_ou_procedimento:
+    atribuicao
+    | chama_procedimento
+;
+
+chama_procedimento: 
+    {
+        if (strcmp(elemAtribuicao.atributos->categoria, "proc") != 0) {
+            printf("A variável precisa ser um procedimento\n");
+            exit(-1);
+        }
+        insereElemPilha(pilhaRotulos, elemAtribuicao.atributos->rotulo);
+    }
+    lista_expressoes_ou_nada
+    {
+        sprintf(comando, "CHPR R%02d, %d", retiraElemPilha(pilhaRotulos), nivelLexico);
+        geraCodigo (NULL, comando);
+    }
+;
+
+lista_expressoes_ou_nada: ;
 
 atribuicao:
     ATRIBUICAO lista_expressoes
@@ -346,6 +468,7 @@ int main (int argc, char** argv) {
     tabelaSimbolos = initTabela();
     pilhaExpressao = initPilha();
     pilhaRotulos = initPilha();
+    pilhaDmem = initPilha();
 
     yyin=fp;
     yyparse();

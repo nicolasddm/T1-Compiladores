@@ -1,16 +1,17 @@
-program exemplo75 (input, output);
-var n, k: integer; 
-    f1, f2, f3:integer;
-begin             
-   read(n);     
-   f1:=0; f2:=1; k:=1;
-   while (k <= n) do  
-   begin              
-      f3:=f2+f1;      
-      f1:=f2;         
-      f2:=f3;         
-      k:=k+1;        
-   end;                 
-   write(n,k);                   
-end. 
-
+program proc1 (input, output); 
+  var x, y: integer;      
+  procedure p;             
+     var z:integer;              
+     begin                   
+       z:=x;                   
+       x:=x-1;           
+       if (z>1)                   
+         then p 
+         else y:=1; 
+       y:=y*z      
+     end;
+begin                     
+   read(x);            
+   p;  
+   write (x,y)             
+end.

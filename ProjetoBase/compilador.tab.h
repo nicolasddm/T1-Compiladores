@@ -88,7 +88,8 @@ extern int yydebug;
     AND = 294,
     NOT = 295,
     NUMERO = 296,
-    IDENT = 297
+    IDENT = 297,
+    LOWER_THAN_ELSE = 298
   };
 #endif
 

@@ -17,6 +17,7 @@ typedef struct {
     int tipo;
     int nivelLexico;
     int deslocamento;
+    int rotulo;
 } Atributos;
 
 typedef struct {
