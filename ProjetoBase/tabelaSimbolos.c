@@ -18,6 +18,8 @@ typedef struct {
     int nivelLexico;
     int deslocamento;
     int rotulo;
+    int passagem;
+    int numeroParametros;
 } Atributos;
 
 typedef struct {
@@ -58,7 +60,7 @@ Simbolo buscaSimbolo(TabelaSimbolos *tabelaSimbolos, char ident[]) {
             return tabelaSimbolos->simbolos[i];
         } 
     }
-    
+    printf("Simbolo %s não encontrado!\n", ident);
     exit(-1);
 }
 
@@ -77,7 +79,7 @@ void retiraSimbolos(TabelaSimbolos *tabelaSimbolos, int n) {
 void imprimeSimbolo(Simbolo simbolo) {
     printf("simboloIdent: %s\n", simbolo.ident);
     Atributos *atributos = simbolo.atributos;
-    printf("categoria: %s; tipo: %d; nivel léxico: %d; deslocamento: %d;\n", atributos->categoria, atributos->tipo, atributos->nivelLexico, atributos->deslocamento);
+    printf("categoria: %s; tipo: %d; nivel léxico: %d; deslocamento: %d; passagem: %d; numParams: %d;\n", atributos->categoria, atributos->tipo, atributos->nivelLexico, atributos->deslocamento, atributos->passagem, atributos->numeroParametros);
 }
 
 void imprimeTabela(TabelaSimbolos *tabelaSimbolos) {
@@ -94,4 +96,48 @@ void atualizaTipo(TabelaSimbolos *tabelaSimbolos, int tipo, int num_simbolos) {
             tabelaSimbolos->simbolos[topo - i].atributos->tipo = tipo;
         }
     }
+}
+
+void atualizaCategoria(TabelaSimbolos *tabelaSimbolos, char categoria[], int num_simbolos) {
+    int topo = tabelaSimbolos->topo;
+    for (int i = 0; i < num_simbolos; i++) {
+        if(strcmp(tabelaSimbolos->simbolos[topo - i].atributos->categoria, "") == 0) {
+            strncpy(tabelaSimbolos->simbolos[topo - i].atributos->categoria, categoria, TAM_MAX);
+        }
+    }
+}
+
+void atualizaPassagem(TabelaSimbolos *tabelaSimbolos, int passagem, int num_simbolos) {
+    int topo = tabelaSimbolos->topo;
+    for (int i = 0; i < num_simbolos; i++) {
+        if(tabelaSimbolos->simbolos[topo - i].atributos->passagem == -1) {
+            tabelaSimbolos->simbolos[topo - i].atributos->passagem = passagem;
+        }
+    }
+}
+
+void atualizaDeslocamento(TabelaSimbolos *tabelaSimbolos, int numParams) {
+    for (int i = 0; i < numParams; i++) {
+        tabelaSimbolos->simbolos[tabelaSimbolos->topo - i].atributos->deslocamento = -4 - i;
+    }
+}
+
+void atualizaParametros(TabelaSimbolos *tabelaSimbolos, int numParams, char ident[]) {
+    Simbolo simbolo = buscaSimbolo(tabelaSimbolos, ident);
+    simbolo.atributos->numeroParametros = numParams;
+}
+
+int verificaExistencia(TabelaSimbolos *tabelaSimbolos, char ident[]) {
+    for (int i = tabelaSimbolos->topo; i >= 0; i--) {
+        if (strcmp(tabelaSimbolos->simbolos[i].ident, ident) == 0) {
+            return 1;
+        } 
+    }
+    return 0;
+}
+
+void attParamsFormais(TabelaSimbolos *tabelaSimbolos, int tipo, int passagem, int num_simbolos) {
+    atualizaTipo(tabelaSimbolos, tipo, num_simbolos);
+    atualizaCategoria(tabelaSimbolos, "pf", num_simbolos);
+    atualizaPassagem(tabelaSimbolos, passagem, num_simbolos);
 }

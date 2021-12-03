@@ -1,17 +1,16 @@
-program proc1 (input, output); 
-  var x, y: integer;      
-  procedure p;             
-     var z:integer;              
-     begin                   
-       z:=x;                   
-       x:=x-1;           
-       if (z>1)                   
-         then p 
-         else y:=1; 
-       y:=y*z      
-     end;
+program proc2 (input, output); 
+var x, y: integer;      
+   procedure p(t:integer);     
+   var z:integer;           
+      begin                    
+        if (t>1)               
+           then p(t-1)
+           else y:=1;          
+        z:= y;                 
+        y:=z*t;                
+      end;                       
 begin                     
-   read(x);            
-   p;  
-   write (x,y)             
-end.
+   read(x);               
+   p(x);       
+   write (x,y)            
+end. 

@@ -66,3 +66,8 @@ void verificaTiposReturnBool(Pilha *pilha) {
         exit(-1);
     }
 }
+
+int buscaTopoElemPilha(Pilha *pilha) {
+    int valor = pilha->elementos[pilha->topo];
+    return valor;
+}

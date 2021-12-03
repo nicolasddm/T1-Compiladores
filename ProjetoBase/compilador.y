@@ -8,6 +8,7 @@
 #include "pilha.c"
 #define TAM_COMANDO 64
 #define TAM_ROTULO 16
+#define TAM_MAX 128
 
 
 char comando[TAM_COMANDO];
@@ -26,6 +27,10 @@ int rotulosTam = -1;
 int rotuloDesviaTrue;
 int rotuloDesviaFalse;
 int numParams = 0;
+int paramsPorTipo = 0;
+int valor = 0;
+int referencia = 1;
+int paramsPassados = 0;
 
 TabelaSimbolos *tabelaSimbolos;
 Simbolo elemento;
@@ -34,6 +39,8 @@ Simbolo elemAtribuicao;
 Pilha *pilhaExpressao;
 Pilha *pilhaRotulos;
 Pilha *pilhaDmem;
+Pilha *pilhaParametros;
+Pilha *pilhaParamsPassados;
 
 %}
 
@@ -62,7 +69,7 @@ programa    :{
 
 bloco:
     parte_declara_vars
-    
+     
     parte_declara_algo_ou_nada
     
     comando_composto {
@@ -75,24 +82,32 @@ bloco:
 ;
 
 parte_declara_algo_ou_nada:  
-    {
+    
+    | {
         rotulosTam++;
         insereElemPilha(pilhaRotulos, rotulosTam);
         sprintf(comando, "DSVS R%02d", rotulosTam);
         geraCodigo(NULL, comando);
-    }  parte_declara_funcoes_ou_procedimentos
-    {
+    }
+    parte_declara_funcoes_ou_procedimentos
+    {   
+        printf("pilhaRotulos: %d\n", pilhaRotulos->topo);
         if (pilhaRotulos->topo >= 0) {
             rotuloDesviaTrue = retiraElemPilha(pilhaRotulos);
             sprintf(comando, "R%02d:NADA", rotuloDesviaTrue);
             geraCodigo(NULL, comando);
         }
     }
-    |
+    
 ;
 
 parte_declara_funcoes_ou_procedimentos: 
-    declara_procedimento PONTO_E_VIRGULA
+    parte_declara_funcoes_ou_procedimentos declara_procedimento_ou_funcao
+    | declara_procedimento_ou_funcao
+;
+
+declara_procedimento_ou_funcao: 
+    | declara_procedimento PONTO_E_VIRGULA
     // | declara_funcao PONTO_E_VIRGULA
 ;
 
@@ -106,23 +121,24 @@ declara_procedimento:
         
     }
     IDENT { 
-        strcpy(ident_proc_funcao, token);
+        strncpy(ident_proc_funcao, token, TAM_MAX);
         Atributos *atributos = (Atributos*) malloc(sizeof(Atributos));
-        strcpy(atributos->categoria, "proc");
+        strncpy(atributos->categoria, "proc", TAM_MAX);
         atributos->nivelLexico = nivelLexico;
         atributos->rotulo = rotulosTam;
+        atributos->passagem = -1;
         insereSimbolo(tabelaSimbolos, ident_proc_funcao, atributos);
 
     } 
     tem_parametro_ou_nada PONTO_E_VIRGULA
     {
-
+        insereElemPilha(pilhaParametros, numParams);
+        atualizaDeslocamento(tabelaSimbolos, numParams);
+        atualizaParametros(tabelaSimbolos, numParams, ident_proc_funcao);
     }
     bloco
     {
-        retiraSimbolos(tabelaSimbolos, numParams);
-        rotuloDesviaFalse = retiraElemPilha(pilhaRotulos);
-        rotuloDesviaTrue =  retiraElemPilha(pilhaRotulos);
+        retiraSimbolos(tabelaSimbolos, retiraElemPilha(pilhaParametros));
         sprintf(comando, "RTPR %d, %d", nivelLexico, numParams);
         geraCodigo(NULL, comando);
         nivelLexico--;
@@ -130,7 +146,44 @@ declara_procedimento:
 ;    
 
 tem_parametro_ou_nada: 
-    // | ABRE_PARENTESES parametros FECHA_PARENTESES
+    ABRE_PARENTESES { numParams = 0; } todos_parametros_formais FECHA_PARENTESES
+    |
+;
+
+todos_parametros_formais:
+    todos_parametros_formais PONTO_E_VIRGULA parametros_formais_tipo  
+    | parametros_formais_tipo
+;
+
+parametros_formais_tipo: 
+    { paramsPorTipo = 0; }
+    idents_params_formais DOIS_PONTOS tipo
+    {
+        attParamsFormais(tabelaSimbolos, numTipo, valor, paramsPorTipo);
+        imprimeTabela(tabelaSimbolos);
+    }
+;
+
+idents_params_formais: 
+    idents_params_formais VIRGULA parametro_formal
+    { numParams++; paramsPorTipo++; }
+    | parametro_formal { numParams++; paramsPorTipo++; }
+;
+
+parametro_formal:
+    IDENT
+    {
+        if (verificaExistencia(tabelaSimbolos, token)) {
+            printf("Esse nome já está sendo usado!\n");
+            exit(-1);
+        }
+
+        Atributos *atributos = (Atributos*) malloc(sizeof(Atributos));
+        atributos->nivelLexico = nivelLexico;
+        atributos->tipo = -1;
+        atributos->passagem = -1;
+        insereSimbolo(tabelaSimbolos, token, atributos);
+    } 
 ;
 
 parte_declara_vars:  var;
@@ -171,26 +224,26 @@ tipo        : IDENT
 lista_id_var: lista_id_var VIRGULA IDENT
             { /* insere �ltima vars na tabela de s�mbolos */
                Atributos *atributos = (Atributos*) malloc(sizeof(Atributos));
-               strcpy(atributos->categoria, "vs");
+               strncpy(atributos->categoria, "vs", TAM_MAX);
                atributos->tipo = -1;
                atributos->nivelLexico = nivelLexico;
                atributos->deslocamento = deslocamento;
-
+               atributos->passagem = -1;
                insereSimbolo(tabelaSimbolos, token, atributos);
                deslocamento++;
                tamAmem++;
 
             }
             | IDENT { /* insere vars na tabela de s�mbolos */
-               Atributos *atributos = (Atributos*) malloc(sizeof(Atributos));
-               strcpy(atributos->categoria, "vs");
-               atributos->tipo = -1;
-               atributos->nivelLexico = nivelLexico;
-               atributos->deslocamento = deslocamento;
-
-               insereSimbolo(tabelaSimbolos, token, atributos);
-               deslocamento++;
-               tamAmem++;
+                Atributos *atributos = (Atributos*) malloc(sizeof(Atributos));
+                strncpy(atributos->categoria, "vs", TAM_MAX);
+                atributos->tipo = -1;
+                atributos->nivelLexico = nivelLexico;
+                atributos->deslocamento = deslocamento;
+                atributos->passagem = -1;
+                insereSimbolo(tabelaSimbolos, token, atributos);
+                deslocamento++;
+                tamAmem++;
             }
 ;
 
@@ -361,7 +414,25 @@ chama_procedimento:
     }
 ;
 
-lista_expressoes_ou_nada: ;
+lista_expressoes_ou_nada: 
+    ABRE_PARENTESES lista_expressoes_proc_function FECHA_PARENTESES
+    |
+;
+
+
+lista_expressoes_proc_function:
+    lista_expressoes_proc_function VIRGULA expressao
+    {
+        paramsPassados = retiraElemPilha(pilhaParamsPassados);
+        insereElemPilha(pilhaParamsPassados, paramsPassados+1);
+    }
+    |
+    expressao
+    {
+        paramsPassados = retiraElemPilha(pilhaParamsPassados);
+        insereElemPilha(pilhaParamsPassados, paramsPassados+1);
+    }
+;
 
 atribuicao:
     ATRIBUICAO lista_expressoes
@@ -418,9 +489,11 @@ fator:
     variavel 
     { 
         insereElemPilha(pilhaExpressao, elemTipo); 
-        if (strcmp(elemento.atributos->categoria, "vs") == 0) {
+        if ((strcmp(elemento.atributos->categoria, "vs") == 0) || (elemento.atributos->passagem == valor)) {
             sprintf(comando, "CRVL %d, %d", elemento.atributos->nivelLexico, elemento.atributos->deslocamento);
         }
+
+        
         geraCodigo (NULL, comando);
     }
     | NOT fator
@@ -469,6 +542,8 @@ int main (int argc, char** argv) {
     pilhaExpressao = initPilha();
     pilhaRotulos = initPilha();
     pilhaDmem = initPilha();
+    pilhaParametros = initPilha();
+    pilhaParamsPassados = initPilha();
 
     yyin=fp;
     yyparse();
